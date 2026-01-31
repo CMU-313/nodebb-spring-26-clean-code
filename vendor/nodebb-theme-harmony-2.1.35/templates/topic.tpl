@@ -83,7 +83,6 @@
 								{{{ if ./editedISO }}}
 								<meta itemprop="dateModified" content="{./editedISO}">
 								{{{ end }}}
-
 								<!-- IMPORT partials/topic/post.tpl -->
 							</li>
 							{{{ if (config.topicPostSort != "most_votes") }}}

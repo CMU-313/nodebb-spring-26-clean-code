@@ -3,12 +3,13 @@
 const db = require('../database');
 const plugins = require('../plugins');
 const utils = require('../utils');
-
 const intFields = [
 	'uid', 'pid', 'tid', 'deleted', 'timestamp',
 	'upvotes', 'downvotes', 'deleterUid', 'edited',
 	'replies', 'bookmarks', 'announces',
 ];
+const groups = require('../groups');
+const user = require('../user');
 
 module.exports = function (Posts) {
 	Posts.getPostsFields = async function (pids, fields) {
@@ -22,12 +23,18 @@ module.exports = function (Posts) {
 			posts: postData,
 			fields: fields,
 		});
+		const endorsedVotes = await getEndorsedUsers(pids);
+
 		result.posts.forEach(post => modifyPost(post, fields));
+		result.posts.forEach((post, i) => {
+			post.endorsedVotes = endorsedVotes[i];
+		});
 		return result.posts;
 	};
 
 	Posts.getPostData = async function (pid) {
 		const posts = await Posts.getPostsFields([pid], []);
+
 		return posts && posts.length ? posts[0] : null;
 	};
 
@@ -54,7 +61,19 @@ module.exports = function (Posts) {
 		plugins.hooks.fire('action:post.setFields', { data: { ...data, pid } });
 	};
 };
+async function getEndorsedUsers(pids) {
+	const upvoterIds = await db.getSetsMembers(pids.map(pid => `pid:${pid}:upvote`));
+	const flattenedUpvoterIds = [... new Set(upvoterIds.flat())];
 
+	const userDataMap = (await user.getUsersFields(flattenedUpvoterIds, ['username'])).reduce((acc, user) => ({ ...acc, [user.uid]: user }), {});
+	const userGroupsMap = (await groups.getUserGroups(flattenedUpvoterIds))
+		.reduce((acc, groups, i) => ({ ...acc, [flattenedUpvoterIds[i]]: groups }), {});
+	const specialUpvotes = upvoterIds.map(userIds =>
+		userIds.filter(uid =>
+			userGroupsMap[uid].find(group => group.slug.toLowerCase() === 'instructor' || group.slug.toLowerCase() === 'ta') !== undefined)
+			.map(uid => userDataMap[uid]));
+	return specialUpvotes;
+}
 function modifyPost(post, fields) {
 	if (post) {
 		db.parseIntFields(post, intFields, fields);

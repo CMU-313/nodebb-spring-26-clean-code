@@ -73,7 +73,7 @@ exports.doTopicAction = async function (action, event, caller, { tids }) {
 		socketHelpers.emitToUids(event, data, notifyUids);
 		await logTopicAction(action, caller, tid, title);
 
-		switch(action) {
+		switch (action) {
 			case 'delete': // falls through
 			case 'purge': {
 				if (utils.isNumber(cid) && parseInt(cid, 10) > 0) {

@@ -203,6 +203,7 @@ module.exports = function (Posts) {
 				reputation: newReputation,
 			},
 			fromuid: uid,
+			post: await Posts.getPostFields(pid, ['pid', 'uid', 'tid']), // re-run with updated vote data
 			post: postData,
 			upvote: type === 'upvote' && !unvote,
 			downvote: type === 'downvote' && !unvote,
