@@ -1,6 +1,19 @@
 FROM mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm
 COPY . /app
 WORKDIR /app
+
+ENV NODEBB_PORT=4567 \
+  NODEBB_DB=redis \
+  NODEBB_REDIS_HOST=127.0.0.1 \
+  NODEBB_REDIS_PORT=6379 \
+  NODEBB_REDIS_PASSWORD= \
+  NODEBB_REDIS_DB=0 \
+  NODEBB_ADMIN_USERNAME=admin \
+  NODEBB_ADMIN_PASSWORD="password123!" \
+  NODEBB_ADMIN_EMAIL=admin@admin.admin \
+  NODE_ENV=development
+
+
 RUN rm -f ./dump.rdb
 RUN apt-get update \
   && apt-get install -y \
@@ -14,5 +27,10 @@ RUN curl https://qlty.sh | /bin/bash \
   && qlty --version
 
 EXPOSE 4567
-
+RUN redis-server --daemonize yes --bind 127.0.0.1 --port 6379 \
+  && until redis-cli ping | grep -q PONG; do sleep 0.2; done \
+  && ./nodebb setup \
+  && ./nodebb build \
+  && redis-cli shutdown
+RUN npm i
 CMD ["/bin/sh","./railway-start.sh"]
