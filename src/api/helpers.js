@@ -141,6 +141,7 @@ exports.postCommand = async function (caller, command, eventName, notification, 
 	return await executeCommand(caller, command, eventName, notification, filteredData.data);
 };
 
+// execute voting command on a post and send a message to client on vote update
 async function executeCommand(caller, command, eventName, notification, data) {
 	const result = await posts[command](data.pid, caller.uid);
 	if (result && eventName) {

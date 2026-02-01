@@ -86,11 +86,12 @@
 		</div>
 
 		<div component="post/footer" class="post-footer border-bottom pb-2">
-			{{{ if posts.endorsedVotes.length }}}
-			<div component="post/endorsed">
+			
+			<div component="post/endorsed" style="display: {{{ if !posts.endorsedVotes.length }}} none {{{ end }}};">
 				<h6><span class="badge bg-success">
 					<i class="fa fa-fw fa-certificate"></i>
 					Endorsed by
+					<span component="post/endorsed/text">
 						{{{ each posts.endorsedVotes }}}
 							{{{ if @last }}}
 							{posts.endorsedVotes.username}
@@ -98,9 +99,10 @@
 							{posts.endorsedVotes.username},
 							{{{ end }}}
 						{{{ end }}}
+					</span>
+
 				</span></h6>
 			</div>
-			{{{ end }}}
 			{{{ if posts.user.signature }}}
 			<div component="post/signature" data-uid="{posts.user.uid}" class="text-xs text-muted mt-2">{posts.user.signature}</div>
 			{{{ end }}}

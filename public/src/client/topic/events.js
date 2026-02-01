@@ -66,13 +66,18 @@ define('forum/topic/events', [
 	}
 
 	function updatePostVotesAndUserReputation(data) {
-		console.log(data);
 		const votes = $('[data-pid="' + data.post.pid + '"] [component="post/vote-count"]').filter(function (index, el) {
 			return $(el).closest('[data-pid]').attr('data-pid') === String(data.post.pid);
 		});
-		// const endorsedVotesComponent = $('[data-pid="' + data.post.pid + '"] [component="post/vote-count"]');
+		const endorsedVotesComponent = $('[data-pid="' + data.post.pid + '"] [component="post/endorsed"]');
 		const reputationElements = $('.reputation[data-uid="' + data.post.uid + '"]');
 		votes.html(data.post.votes).attr('data-votes', data.post.votes);
+		if (data.endorsedData.length) {
+			endorsedVotesComponent.show();
+			endorsedVotesComponent.find("[component='post/endorsed/text']").text(data.endorsedData.map(user => user.username).join(', '));
+		} else {
+			endorsedVotesComponent.hide();
+		}
 		reputationElements.html(data.user.reputation).attr('data-reputation', data.user.reputation);
 	}
 

@@ -23,7 +23,7 @@ module.exports = function (Posts) {
 			posts: postData,
 			fields: fields,
 		});
-		const endorsedVotes = await getEndorsedUsers(pids);
+		const endorsedVotes = await Posts.getEndorsedUsers(pids);
 
 		result.posts.forEach(post => modifyPost(post, fields));
 		result.posts.forEach((post, i) => {
@@ -60,20 +60,21 @@ module.exports = function (Posts) {
 		await db.setObject(`post:${pid}`, data);
 		plugins.hooks.fire('action:post.setFields', { data: { ...data, pid } });
 	};
-};
-async function getEndorsedUsers(pids) {
-	const upvoterIds = await db.getSetsMembers(pids.map(pid => `pid:${pid}:upvote`));
-	const flattenedUpvoterIds = [... new Set(upvoterIds.flat())];
+	Posts.getEndorsedUsers = async function (pids) {
+		const upvoterIds = await db.getSetsMembers(pids.map(pid => `pid:${pid}:upvote`));
+		const flattenedUpvoterIds = [... new Set(upvoterIds.flat())];
 
-	const userDataMap = (await user.getUsersFields(flattenedUpvoterIds, ['username'])).reduce((acc, user) => ({ ...acc, [user.uid]: user }), {});
-	const userGroupsMap = (await groups.getUserGroups(flattenedUpvoterIds))
-		.reduce((acc, groups, i) => ({ ...acc, [flattenedUpvoterIds[i]]: groups }), {});
-	const specialUpvotes = upvoterIds.map(userIds =>
-		userIds.filter(uid =>
-			userGroupsMap[uid].find(group => group.slug.toLowerCase() === 'instructor' || group.slug.toLowerCase() === 'ta') !== undefined)
-			.map(uid => userDataMap[uid]));
-	return specialUpvotes;
-}
+		const userDataMap = (await user.getUsersFields(flattenedUpvoterIds, ['username'])).reduce((acc, user) => ({ ...acc, [user.uid]: user }), {});
+		const userGroupsMap = (await groups.getUserGroups(flattenedUpvoterIds))
+			.reduce((acc, groups, i) => ({ ...acc, [flattenedUpvoterIds[i]]: groups }), {});
+		const specialUpvotes = upvoterIds.map(userIds =>
+			userIds.filter(uid =>
+				userGroupsMap[uid].find(group => group.slug.toLowerCase() === 'instructor' || group.slug.toLowerCase() === 'ta') !== undefined)
+				.map(uid => userDataMap[uid]));
+		return specialUpvotes;
+	};
+};
+
 function modifyPost(post, fields) {
 	if (post) {
 		db.parseIntFields(post, intFields, fields);
