@@ -11,3 +11,9 @@ RUN curl https://qlty.sh | /bin/bash \
   && rm -rf ~/.qlty \
   && qlty --version
 
+RUN redis-server --daemonize yes
+EXPOSE 4567
+RUN ./nodebb setup
+RUN ./nodebb build
+RUN npm i
+CMD ["./nodebb","start"]
