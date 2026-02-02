@@ -535,7 +535,7 @@ describe('API', async () => {
 					assert(
 						responses.hasOwnProperty('418') ||
 						Object.keys(responses).includes(String(result.response.statusCode)),
-						`${method.toUpperCase()} ${path} sent back unexpected HTTP status code: ${result.response.statusCode}`
+						`${method.toUpperCase()} ${path} sent back unexpected HTTP status code: ${result.response.statusCode} (expected: ${JSON.stringify(responses)})`
 					);
 				});
 
@@ -697,7 +697,7 @@ describe('API', async () => {
 				return;
 			}
 
-			assert(schema[prop], `"${prop}" was found in response, but is not defined in schema (path: ${method} ${path}, context: ${context}), SCHEMA ${JSON.stringify(response)}`);
+			assert(schema[prop], `"${prop}" was found in response, but is not defined in schema (path: ${method} ${path}, context: ${context}), SCHEMA ${JSON.stringify(schema)} ${JSON.stringify(response)}`);
 		});
 	}
 });
