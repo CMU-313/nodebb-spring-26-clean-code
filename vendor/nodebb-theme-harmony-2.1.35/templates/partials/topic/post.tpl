@@ -100,7 +100,6 @@
 							{{{ end }}}
 						{{{ end }}}
 					</span>
-
 				</span></h6>
 			</div>
 			{{{ if posts.user.signature }}}
