@@ -2,17 +2,15 @@ FROM mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm
 COPY . /app
 WORKDIR /app
 
-ENV NODEBB_PORT=4567 \
-  NODEBB_DB=redis \
-  NODEBB_REDIS_HOST=127.0.0.1 \
-  NODEBB_REDIS_PORT=6379 \
-  NODEBB_REDIS_PASSWORD= \
-  NODEBB_REDIS_DB=0 \
-  NODEBB_ADMIN_USERNAME=admin \
-  NODEBB_ADMIN_PASSWORD="password123!" \
-  NODEBB_ADMIN_EMAIL=admin@admin.admin \
-  NODE_ENV=development
-
+ARG NODEBB_PORT
+ARG NODEBB_DB
+ARG REDIS_URL
+ARG NODEBB_ADMIN_USERNAME
+ARG NODEBB_ADMIN_PASSWORD
+ARG NODEBB_ADMIN_EMAIL
+ARG NODEBB_URL
+ARG NODE_ENV
+SHELL ["/bin/bash", "-c"] 
 
 RUN rm -f ./dump.rdb
 RUN apt-get update \
@@ -21,15 +19,14 @@ RUN apt-get update \
   redis-server \
   && rm -rf /var/lib/apt/lists/*
 
-RUN curl https://qlty.sh | /bin/bash \
+RUN set -eu; \
+  . ./parse-redis-url.sh \ 
+  && curl https://qlty.sh | /bin/bash \
   && mv ~/.qlty/bin/qlty /usr/local/bin/qlty \
   && rm -rf ~/.qlty \
-  && qlty --version
+  && qlty --version \
+  && ./nodebb setup
 
 EXPOSE 4567
-RUN redis-server --daemonize yes --bind 127.0.0.1 --port 6379 \
-  && until redis-cli ping | grep -q PONG; do sleep 0.2; done \
-  && ./nodebb setup \
-  && redis-cli shutdown
 RUN npm i
 CMD ["/bin/sh","./railway-start.sh"]

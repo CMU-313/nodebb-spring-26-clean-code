@@ -72,7 +72,6 @@ function checkSetupFlagEnv() {
 	if (Object.keys(envConfMap).some(key => envKeys.includes(key))) {
 		winston.info('[install/checkSetupFlagEnv] checking env vars for setup info...');
 		setupVal = setupVal || {};
-
 		Object.entries(process.env).forEach(([evName, evValue]) => { // get setup values from env
 			if (evName.startsWith('NODEBB_DB_')) {
 				setupVal[`${process.env.NODEBB_DB}:${envConfMap[evName]}`] = evValue;
