@@ -1,3 +1,4 @@
+
 <div class="account w-100 mx-auto">
 	<div class="cover position-absolute start-0 top-0 w-100" component="account/cover" style="background-image: url({cover:url}); background-position: {cover:position};">
 		<div class="container">

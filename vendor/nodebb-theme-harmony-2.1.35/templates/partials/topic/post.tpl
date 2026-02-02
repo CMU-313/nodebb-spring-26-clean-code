@@ -8,6 +8,7 @@
 {{{ if (./parent && !hideParent) }}}
 <!-- IMPORT partials/topic/post-parent.tpl -->
 {{{ end }}}
+
 <div class="d-flex align-items-start gap-3 post-container-parent">
 	<div class="bg-body d-none d-sm-block rounded-circle" style="outline: 2px solid var(--bs-body-bg);">
 		<a class="d-inline-block position-relative text-decoration-none" href="{{{ if ./user.userslug }}}{config.relative_path}/user/{./user.userslug}{{{ else }}}#{{{ end }}}" aria-label="[[aria:profile-page-for, {./user.displayname}]]">
@@ -85,6 +86,22 @@
 		</div>
 
 		<div component="post/footer" class="post-footer border-bottom pb-2">
+			
+			<div component="post/endorsed" style="display: {{{ if !posts.endorsedVotes.length }}} none {{{ end }}};">
+				<h6><span class="badge bg-success">
+					<i class="fa fa-fw fa-certificate"></i>
+					Endorsed by
+					<span component="post/endorsed/text">
+						{{{ each posts.endorsedVotes }}}
+							{{{ if @last }}}
+							{posts.endorsedVotes.username}
+							{{{ else }}}
+							{posts.endorsedVotes.username},
+							{{{ end }}}
+						{{{ end }}}
+					</span>
+				</span></h6>
+			</div>
 			{{{ if posts.user.signature }}}
 			<div component="post/signature" data-uid="{posts.user.uid}" class="text-xs text-muted mt-2">{posts.user.signature}</div>
 			{{{ end }}}
