@@ -30,7 +30,6 @@ EXPOSE 4567
 RUN redis-server --daemonize yes --bind 127.0.0.1 --port 6379 \
   && until redis-cli ping | grep -q PONG; do sleep 0.2; done \
   && ./nodebb setup \
-  && ./nodebb build \
   && redis-cli shutdown
 RUN npm i
 CMD ["/bin/sh","./railway-start.sh"]

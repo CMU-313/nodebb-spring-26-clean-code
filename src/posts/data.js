@@ -23,10 +23,12 @@ module.exports = function (Posts) {
 			posts: postData,
 			fields: fields,
 		});
+
 		const endorsedVotes = await Posts.getEndorsedUsers(pids);
 
 		result.posts.forEach(post => modifyPost(post, fields));
 		result.posts.forEach((post, i) => {
+			if (post === undefined || post === null) return;
 			post.endorsedVotes = endorsedVotes[i];
 		});
 		return result.posts;
