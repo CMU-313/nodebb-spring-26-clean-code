@@ -252,7 +252,7 @@ define('forum/search', [
 
 	function categoryFilterDropdown(_selectedCids) {
 		ajaxify.data.allCategoriesUrl = '';
-		selectedCids = _selectedCids || [];
+		selectedCids = _selectedCids || ['all'];
 		const dropdownEl = $('[component="category/filter"]');
 		categoryFilter.init(dropdownEl, {
 			selectedCids: _selectedCids,
