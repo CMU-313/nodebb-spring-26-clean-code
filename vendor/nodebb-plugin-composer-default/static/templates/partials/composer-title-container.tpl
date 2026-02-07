@@ -1,5 +1,4 @@
 <div class="title-container align-items-center gap-2 d-flex">
-	 hiiiii!
 	{{{ if isTopic }}}
 	<div class="category-list-container {{{ if !template.compose }}}d-none d-md-block{{{ end }}} align-self-center">
 		<!-- IMPORT partials/category/selector-dropdown-left.tpl -->
