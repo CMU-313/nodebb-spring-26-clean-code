@@ -90,7 +90,7 @@ define('categoryFilter', ['categorySearch', 'api', 'hooks'], function (categoryS
 			} else {
 				el.find('[component="category/select/icon"]').addClass('invisible');
 				listEl.find('[data-cid="all"] i').removeClass('invisible');
-				selectedCids = ['all'];	// IMPORTANT: backend expects this
+				selectedCids = ['all']; // IMPORTANT: backend expects this
 			}
 
 			options.selectedCids = selectedCids;
