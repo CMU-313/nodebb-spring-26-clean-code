@@ -6,7 +6,7 @@ const utils = require('../utils');
 const intFields = [
 	'uid', 'pid', 'tid', 'deleted', 'timestamp',
 	'upvotes', 'downvotes', 'deleterUid', 'edited',
-	'replies', 'bookmarks', 'announces',
+	'replies', 'bookmarks', 'announces', 'anonymous',
 ];
 const groups = require('../groups');
 const user = require('../user');
