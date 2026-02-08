@@ -215,6 +215,8 @@ TopicObject:
           description: "`pinExpiry` rendered as an ISO 8601 format"
         index:
           type: number
+        endorsed:
+          type: boolean
       required:
         - tid
 TopicObjectSlim:
@@ -305,9 +307,12 @@ TopicObjectSlim:
               url:
                 type: string
                 description: Relative path to the topic thumbnail
+
     - type: object
       description: Optional properties that may or may not be present (except for `tid`, which is always present, and is only here as a hack to pass validation)
       properties:
+        endorsed:
+          type: boolean
         tid:
           type: number
           description: A topic identifier

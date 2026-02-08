@@ -7,7 +7,6 @@
 		<meta itemprop="itemListOrder" content="descending" />
 		<meta itemprop="position" content="{increment(./index, "1")}" />
 		<a id="{./index}" data-index="{./index}" component="topic/anchor"></a>
-
 		<div class="d-flex p-0 col-12 col-lg-7 gap-2 gap-lg-3 pe-1 align-items-start {{{ if config.theme.mobileTopicTeasers }}}mb-2 mb-lg-0{{{ end }}}">
 			<div class="flex-shrink-0 position-relative">
 				<a class="d-inline-block text-decoration-none avatar-tooltip" title="{./user.displayname}" href="{{{ if ./user.userslug }}}{config.relative_path}/user/{./user.userslug}{{{ else }}}#{{{ end }}}">
@@ -84,7 +83,6 @@
 			</a>
 			{{{ end }}}
 		</div>
-
 		<div class="d-flex p-0 col-lg-5 col-12 align-content-stretch">
 			<div class="meta stats d-none d-lg-grid col-6 gap-1 pe-2 text-muted" style="grid-template-columns: {{{ if !reputation:disabled }}}1fr{{{ end }}} 1fr 1fr;">
 				{{{ if !reputation:disabled }}}
@@ -126,6 +124,12 @@
 				</div>
 			</div>
 		</div>
+		{{{ if topics.endorsed }}}
+		<div component="category/topic/endorsed-decor">
+			<div class="triangle"></div>
+			<i class="fa fa-solid fa-award"></i>
+		</div>
+		{{{end}}}
 	</li>
 	{{{end}}}
 </ul>
