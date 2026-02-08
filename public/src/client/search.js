@@ -16,7 +16,6 @@ define('forum/search', [
 	let selectedTags = [];
 	let selectedCids = [];
 	let searchFilters = {};
-	let lastAutoQueryUrl = null;
 
 	Search.init = function () {
 		let alreadyQueried = false;
