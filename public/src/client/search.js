@@ -16,10 +16,9 @@ define('forum/search', [
 	let selectedTags = [];
 	let selectedCids = [];
 	let searchFilters = {};
+	let lastAutoQueryUrl = null;
 
 	Search.init = function () {
-		let alreadyQueried = false;
-
 		const searchIn = $('#search-in');
 		searchIn.on('change', function () {
 			updateFormItemVisiblity(searchIn.val());
@@ -56,8 +55,7 @@ define('forum/search', [
 			}
 
 			const searchFiltersNew = getSearchDataFromDOM();
-			if (!alreadyQueried || JSON.stringify(searchFilters) !== JSON.stringify(searchFiltersNew)) {
-				alreadyQueried = true;
+			if (JSON.stringify(searchFilters) !== JSON.stringify(searchFiltersNew)) {
 				searchFilters = searchFiltersNew;
 				searchModule.query(searchFilters);
 			}
@@ -69,6 +67,16 @@ define('forum/search', [
 		updateSortFilter();
 
 		searchFilters = getSearchDataFromDOM();
+		const currentUrl = window.location.pathname + window.location.search;
+
+		// Only auto-query when arriving with a term AND the page doesn't already have results rendered
+		const hasRenderedResults = !!$('#results .search-results').length;
+		const term = (searchFilters.term || '').trim();
+
+		if (term && !hasRenderedResults && lastAutoQueryUrl !== currentUrl) {
+			lastAutoQueryUrl = currentUrl;
+			searchModule.query(searchFilters);
+		}
 	};
 
 	function updateTagFilter() {
