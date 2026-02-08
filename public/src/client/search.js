@@ -16,6 +16,8 @@ define('forum/search', [
 	let selectedTags = [];
 	let selectedCids = [];
 	let searchFilters = {};
+	let lastAutoQueryUrl = null;
+
 	Search.init = function () {
 		const searchIn = $('#search-in');
 		searchIn.on('change', function () {
@@ -65,6 +67,16 @@ define('forum/search', [
 		updateSortFilter();
 
 		searchFilters = getSearchDataFromDOM();
+		const currentUrl = window.location.pathname + window.location.search;
+
+		// Only auto-query when arriving with a term AND the page doesn't already have results rendered
+		const hasRenderedResults = !!$('#results .search-results').length;
+		const term = (searchFilters.term || '').trim();
+
+		if (term && !hasRenderedResults && lastAutoQueryUrl !== currentUrl) {
+			lastAutoQueryUrl = currentUrl;
+			searchModule.query(searchFilters);
+		}
 	};
 
 	function updateTagFilter() {
@@ -122,7 +134,8 @@ define('forum/search', [
 		if (['posts', 'titlesposts', 'titles', 'bookmarks'].includes(searchData.in)) {
 			searchData.matchWords = form.find('#match-words-filter').val();
 			searchData.by = selectedUsers.length ? selectedUsers.map(u => u.username) : undefined;
-			searchData.categories = selectedCids.length ? selectedCids : undefined;
+			const cids = Array.isArray(selectedCids) ? selectedCids : [];
+			searchData.categories = cids.length ? cids : ['all'];
 			searchData.searchChildren = form.find('#search-children').is(':checked');
 			searchData.hasTags = selectedTags.length ? selectedTags.map(t => t.value) : undefined;
 			searchData.replies = form.find('#reply-count').val();
@@ -289,6 +302,8 @@ define('forum/search', [
 			],
 		});
 	}
+
+
 
 	function userFilterDropdown(el, _selectedUsers) {
 		selectedUsers = _selectedUsers || [];
