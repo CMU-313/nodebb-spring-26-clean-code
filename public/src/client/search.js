@@ -19,6 +19,8 @@ define('forum/search', [
 	let lastAutoQueryUrl = null;
 
 	Search.init = function () {
+		let alreadyQueried = false;
+
 		const searchIn = $('#search-in');
 		searchIn.on('change', function () {
 			updateFormItemVisiblity(searchIn.val());
@@ -55,7 +57,8 @@ define('forum/search', [
 			}
 
 			const searchFiltersNew = getSearchDataFromDOM();
-			if (JSON.stringify(searchFilters) !== JSON.stringify(searchFiltersNew)) {
+			if (!alreadyQueried || JSON.stringify(searchFilters) !== JSON.stringify(searchFiltersNew)) {
+				alreadyQueried = true;
 				searchFilters = searchFiltersNew;
 				searchModule.query(searchFilters);
 			}
@@ -67,17 +70,6 @@ define('forum/search', [
 		updateSortFilter();
 
 		searchFilters = getSearchDataFromDOM();
-		
-		const currentUrl = window.location.pathname + window.location.search;
-
-		// Only auto-query when arriving with a term AND the page doesn't already have results rendered
-		const hasRenderedResults = !!$('#results .search-results').length;
-		const term = (searchFilters.term || '').trim();
-
-		if (term && !hasRenderedResults && lastAutoQueryUrl !== currentUrl) {
-			lastAutoQueryUrl = currentUrl;
-			searchModule.query(searchFilters);
-		}
 	};
 
 	function updateTagFilter() {
@@ -266,58 +258,41 @@ define('forum/search', [
 
 	function categoryFilterDropdown(_selectedCids) {
 		ajaxify.data.allCategoriesUrl = '';
-
-		// UI semantics: All = []
-		let uiCids = Array.isArray(_selectedCids) ? _selectedCids.map(String) : [];
-
-		// sanitize any bad inputs
-		uiCids = uiCids.filter(Boolean);
-
-		// if upstream gave ['all'], convert to UI form []
-		if (uiCids.length === 1 && uiCids[0] === 'all') {
-			uiCids = [];
-		}
-		// if upstream accidentally includes 'all' with others, drop it
-		if (uiCids.includes('all')) {
-			uiCids = uiCids.filter(cid => cid !== 'all');
-		}
-
-		ajaxify.data.selectedCids = uiCids;
-		selectedCids = uiCids;
-
+		selectedCids = _selectedCids || [];
 		const dropdownEl = $('[component="category/filter"]');
 		categoryFilter.init(dropdownEl, {
-			selectedCids: uiCids, // pass [] for All
-			updateButton: false,
+			selectedCids: _selectedCids,
+			updateButton: false, // prevent categoryFilter module from updating the button
 			onHidden: async function (data) {
-				let cids = Array.isArray(data.selectedCids) ? data.selectedCids.map(String) : [];
-				cids = cids.filter(Boolean).filter(cid => cid !== 'all'); // keep UI form
-
-				ajaxify.data.selectedCids = cids;
-				selectedCids = cids;
-
-				const isActive = cids.length > 0;
-
+				const isActive = data.selectedCids.length > 0 && data.selectedCids[0] !== 'all';
 				let labelText = '[[search:categories]]';
-				if (cids.length === 1 && cids[0] === 'watched') {
+				ajaxify.data.selectedCids = data.selectedCids;
+				selectedCids = data.selectedCids;
+				if (data.selectedCids.length === 1 && data.selectedCids[0] === 'watched') {
 					ajaxify.data.selectedCategory = { cid: 'watched' };
-					labelText = '[[search:categories-watched-categories]]';
-				} else if (cids.length > 1) {
-					labelText = `[[search:categories-x, ${cids.length}]]`;
-				} else if (cids.length === 1) {
-					const categoryData = await api.get(`/categories/${cids[0]}`);
+					labelText = `[[search:categories-watched-categories]]`;
+				} else if (data.selectedCids.length === 1 && data.selectedCids[0] === 'all') {
+					ajaxify.data.selectedCategory = null;
+				} else if (data.selectedCids.length > 0) {
+					const categoryData = await api.get(`/categories/${data.selectedCids[0]}`);
 					ajaxify.data.selectedCategory = categoryData;
 					labelText = `[[search:categories-x, ${categoryData.name}]]`;
-				} else {
-					ajaxify.data.selectedCategory = { cid: 'all' };
+				}
+				if (data.selectedCids.length > 1) {
+					labelText = `[[search:categories-x, ${data.selectedCids.length}]]`;
 				}
 
-				$('[component="category/filter/button"]')
-					.toggleClass('active-filter', isActive)
-					.find('.filter-label')
-					.translateText(labelText);
+				$('[component="category/filter/button"]').toggleClass(
+					'active-filter', isActive
+				).find('.filter-label').translateText(labelText);
 			},
-			localCategories: [{ cid: 'watched', name: '[[category:watched-categories]]', icon: '' }],
+			localCategories: [
+				{
+					cid: 'watched',
+					name: '[[category:watched-categories]]',
+					icon: '',
+				},
+			],
 		});
 	}
 
