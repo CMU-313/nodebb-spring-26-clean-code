@@ -16,7 +16,7 @@ define('forum/search', [
 	let selectedTags = [];
 	let selectedCids = [];
 	let searchFilters = {};
-	let lastAutoQueryUrl = null;
+	let firstInit = true;
 
 	Search.init = function () {
 		const searchIn = $('#search-in');
@@ -37,7 +37,6 @@ define('forum/search', [
 		});
 
 		handleSavePreferences();
-
 		categoryFilterDropdown(ajaxify.data.selectedCids);
 		userFilterDropdown($('[component="user/filter"]'), ajaxify.data.userFilterSelected);
 		tagFilterDropdown($('[component="tag/filter"]'), ajaxify.data.tagFilterSelected);
@@ -67,15 +66,11 @@ define('forum/search', [
 		updateSortFilter();
 
 		searchFilters = getSearchDataFromDOM();
-		const currentUrl = window.location.pathname + window.location.search;
-
-		// Only auto-query when arriving with a term AND the page doesn't already have results rendered
-		const hasRenderedResults = !!$('#results .search-results').length;
 		const term = (searchFilters.term || '').trim();
 
-		if (term && !hasRenderedResults && lastAutoQueryUrl !== currentUrl) {
-			lastAutoQueryUrl = currentUrl;
+		if (term && firstInit) {
 			searchModule.query(searchFilters);
+			firstInit = false;
 		}
 	};
 
@@ -146,7 +141,6 @@ define('forum/search', [
 			searchData.sortDirection = form.find('#post-sort-direction').val();
 			searchData.showAs = form.find('#show-results-as').val();
 		}
-
 		hooks.fire('action:search.getSearchDataFromDOM', {
 			form: form,
 			data: searchData,
