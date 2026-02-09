@@ -16,7 +16,7 @@ define('forum/search', [
 	let selectedTags = [];
 	let selectedCids = [];
 	let searchFilters = {};
-	let lastAutoQueryUrl = null;
+	let firstQuery = true;
 
 	Search.init = function () {
 		const searchIn = $('#search-in');
@@ -67,14 +67,12 @@ define('forum/search', [
 		updateSortFilter();
 
 		searchFilters = getSearchDataFromDOM();
-		const currentUrl = window.location.pathname + window.location.search;
 
 		// Only auto-query when arriving with a term AND the page doesn't already have results rendered
-		const hasRenderedResults = !!$('#results .search-results').length;
 		const term = (searchFilters.term || '').trim();
 
-		if (term && !hasRenderedResults && lastAutoQueryUrl !== currentUrl) {
-			lastAutoQueryUrl = currentUrl;
+		if (term && firstQuery) {
+			firstQuery = false;
 			searchModule.query(searchFilters);
 		}
 	};
