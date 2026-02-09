@@ -1,3 +1,4 @@
+/* eslint-disable @stylistic/js/indent */
 'use strict';
 
 define('forum/category', [
@@ -42,6 +43,11 @@ define('forum/category', [
 
 		handleDescription();
 
+		// Initialize date group collapse/expand if grouped view is active
+		if (ajaxify.data.grouped) {
+			initDateGroupCollapse();
+		}
+
 		categorySelector.init($('[component="category-selector"]'), {
 			privilege: 'find',
 			parentCid: ajaxify.data.cid,
@@ -55,6 +61,30 @@ define('forum/category', [
 		hooks.fire('action:topics.loaded', { topics: ajaxify.data.topics });
 		hooks.fire('action:category.loaded', { cid: ajaxify.data.cid });
 	};
+
+	function initDateGroupCollapse() {
+		$('[component="category/date-group/header"]').on('click', function () {
+			const $header = $(this);
+			const $chevron = $header.find('.date-group-chevron');
+            const isExpanded = $header.attr('aria-expanded') === 'true';
+
+            $header.attr('aria-expanded', String(!isExpanded));
+            $chevron.toggleClass('collapsed', isExpanded);
+        });
+
+        // Listen for Bootstrap collapse events to keep aria-expanded in sync
+        $('.date-group .collapse').on('shown.bs.collapse', function () {
+            const $header = $(this).siblings('[component="category/date-group/header"]');
+            $header.attr('aria-expanded', 'true');
+            $header.find('.date-group-chevron').removeClass('collapsed');
+        });
+
+        $('.date-group .collapse').on('hidden.bs.collapse', function () {
+            const $header = $(this).siblings('[component="category/date-group/header"]');
+            $header.attr('aria-expanded', 'false');
+            $header.find('.date-group-chevron').addClass('collapsed');
+        });
+	}
 
 	function handleScrollToTopicIndex() {
 		let topicIndex = ajaxify.data.topicIndex;

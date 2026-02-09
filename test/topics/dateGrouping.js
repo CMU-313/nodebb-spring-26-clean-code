@@ -1,3 +1,4 @@
+/* eslint-disable @stylistic/js/no-mixed-operators */
 'use strict';
 
 const assert = require('assert');
