@@ -152,7 +152,6 @@ async function searchInContent(data) {
 	await plugins.hooks.fire('filter:search.contentGetResult', { result: returnData, data: data });
 	delete metadata.pids;
 	delete metadata.data;
-	console.log(returnData);
 	return Object.assign(returnData, metadata);
 }
 
