@@ -16,7 +16,7 @@ define('forum/search', [
 	let selectedTags = [];
 	let selectedCids = [];
 	let searchFilters = {};
-	let firstQuery = true;
+	let lastAutoQueryUrl = null;
 
 	Search.init = function () {
 		const searchIn = $('#search-in');
@@ -70,9 +70,10 @@ define('forum/search', [
 
 		// Only auto-query when arriving with a term AND the page doesn't already have results rendered
 		const term = (searchFilters.term || '').trim();
-
-		if (term && firstQuery) {
-			firstQuery = false;
+		const currentUrl = window.location.search;
+		
+		if (term && lastAutoQueryUrl !== currentUrl) {
+			lastAutoQueryUrl = currentUrl;
 			searchModule.query(searchFilters);
 		}
 	};
