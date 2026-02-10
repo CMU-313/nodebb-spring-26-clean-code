@@ -67,12 +67,13 @@ define('forum/search', [
 		updateSortFilter();
 
 		searchFilters = getSearchDataFromDOM();
+		const currentUrl = window.location.pathname + window.location.search;
 
 		// Only auto-query when arriving with a term AND the page doesn't already have results rendered
+		const hasRenderedResults = !!$('#results .search-results').length;
 		const term = (searchFilters.term || '').trim();
-		const currentUrl = window.location.search;
-		
-		if (term && lastAutoQueryUrl !== currentUrl) {
+
+		if (term && !hasRenderedResults && lastAutoQueryUrl !== currentUrl) {
 			lastAutoQueryUrl = currentUrl;
 			searchModule.query(searchFilters);
 		}
