@@ -55,7 +55,6 @@ search.search = async function (data) {
 
 async function searchInContent(data) {
 	data.uid = data.uid || 0;
-	data.categories = data.categories;
 
 	const [searchCids, searchUids] = await Promise.all([
 		getSearchCids(data),
