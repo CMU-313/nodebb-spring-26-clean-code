@@ -62,29 +62,31 @@ define('forum/category', [
 		hooks.fire('action:category.loaded', { cid: ajaxify.data.cid });
 	};
 
-	function initDateGroupCollapse() {
-		$('[component="category/date-group/header"]').on('click', function () {
-			const $header = $(this);
-			const $chevron = $header.find('.date-group-chevron');
-            const isExpanded = $header.attr('aria-expanded') === 'true';
+    function initDateGroupCollapse() {
+        $('[component="category/date-group"]').each(function () {
+            const $group = $(this);
+            const $header = $group.find('[component="category/date-group/header"]');
+            const $chevron = $header.find('.date-group-chevron');
+            const $body = $group.find('.date-group-body');
 
-            $header.attr('aria-expanded', String(!isExpanded));
-            $chevron.toggleClass('collapsed', isExpanded);
-        });
+            $header.on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
 
-        // Listen for Bootstrap collapse events to keep aria-expanded in sync
-        $('.date-group .collapse').on('shown.bs.collapse', function () {
-            const $header = $(this).siblings('[component="category/date-group/header"]');
-            $header.attr('aria-expanded', 'true');
-            $header.find('.date-group-chevron').removeClass('collapsed');
-        });
+                var isVisible = $body.is(':visible');
 
-        $('.date-group .collapse').on('hidden.bs.collapse', function () {
-            const $header = $(this).siblings('[component="category/date-group/header"]');
-            $header.attr('aria-expanded', 'false');
-            $header.find('.date-group-chevron').addClass('collapsed');
+                if (isVisible) {
+                    $body.slideUp(200);
+                    $chevron.removeClass('fa-chevron-down').addClass('fa-chevron-right');
+                    $header.attr('aria-expanded', 'false');
+                } else {
+                    $body.slideDown(200);
+                    $chevron.removeClass('fa-chevron-right').addClass('fa-chevron-down');
+                    $header.attr('aria-expanded', 'true');
+                }
+            });
         });
-	}
+    }
 
 	function handleScrollToTopicIndex() {
 		let topicIndex = ajaxify.data.topicIndex;
