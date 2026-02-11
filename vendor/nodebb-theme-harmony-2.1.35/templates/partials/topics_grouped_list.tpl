@@ -47,28 +47,41 @@
                         {{{ end }}}
                     </div>
                 </div>
-                <div class="d-none d-lg-flex col-lg-5 gap-1 align-items-start">
-                    <div class="d-flex gap-1 flex-nowrap align-items-stretch col-lg-6 justify-content-between">
+                <div class="d-none d-lg-flex col-lg-5 ms-auto gap-2 align-items-start justify-content-end">
+                    <div class="d-flex gap-1 flex-nowrap align-items-stretch flex-shrink-0">
                         {{{ if !reputation:disabled }}}
                         <div class="stats-votes card card-header border-0 p-2 overflow-hidden rounded-1 d-flex flex-column align-items-center">
-
-
-
+                            <span class="text-xs fw-semibold" title="{../votes}">{humanReadableNumber(../votes)}</span>
+                            <span class="text-xs text-muted">[[global:votes]]</span>
                         </div>
                         {{{ end }}}
                         <div class="stats-postcount card card-header border-0 p-2 overflow-hidden rounded-1 d-flex flex-column align-items-center">
-
-
-
+                            <span class="text-xs fw-semibold" title="{../postcount}">{humanReadableNumber(../postcount)}</span>
+                            <span class="text-xs text-muted">[[global:posts]]</span>
                         </div>
                         <div class="stats-viewcount card card-header border-0 p-2 overflow-hidden rounded-1 d-flex flex-column align-items-center">
-
-
-
+                            <span class="text-xs fw-semibold" title="{../viewcount}">{humanReadableNumber(../viewcount)}</span>
+                            <span class="text-xs text-muted">[[global:views]]</span>
                         </div>
                     </div>
-                    <div component="topic/teaser" class="meta teaser ps-5 ps-lg-0 col-lg-6 col-12 {{{ if !config.theme.mobileTopicTeasers }}}d-none d-lg-block{{{ end }}}">
-                        <div class="lastpost border-start border-2 lh-sm h-100 d-flex flex-column gap-1" style="border-color: {../category.bgColor}!important;">
+                    <div component="topic/teaser" class="meta teaser flex-grow-1 min-width-0 {{{ if !config.theme.mobileTopicTeasers }}}d-none d-lg-block{{{ end }}}">
+                        <div class="lastpost border-start border-2 lh-sm h-100 d-flex flex-column gap-1 ps-2" style="border-color: {../category.bgColor}!important;">
+                            {{{ if ../unreplied }}}
+                            <div class="text-xs">
+                                [[category:no-replies]]
+                            </div>
+                            {{{ else }}}
+                            {{{ if ../teaser.pid }}}
+                            <div>
+                                <a href="{{{ if ../teaser.user.userslug }}}{config.relative_path}/user/{../teaser.user.userslug}{{{ else }}}#{{{ end }}}" class="text-decoration-none avatar-tooltip" title="{../teaser.user.displayname}">{buildAvatar(../teaser.user, "18px", true)}</a>
+                                <a class="permalink text-muted timeago text-xs" href="{config.relative_path}/topic/{../slug}/{../teaser.index}" title="{../teaser.timestampISO}" aria-label="[[global:lastpost]]"></a>
+                            </div>
+                            <div class="post-content text-xs line-clamp-sm-2 lh-sm text-break position-relative flex-fill">
+                                <a class="stretched-link" tabindex="-1" href="{config.relative_path}/topic/{../slug}/{../teaser.index}" aria-label="[[global:lastpost]]"></a>
+                                {../teaser.content}
+                            </div>
+                            {{{ end }}}
+                            {{{ end }}}
                         </div>
                     </div>
                 </div>
