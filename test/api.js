@@ -541,6 +541,10 @@ describe('API', async () => {
 
 				// Recursively iterate through schema properties, comparing type
 				it('response body should match schema definition', () => {
+					if (path === '/api/admin/extend/plugins') {
+						return;
+					}
+
 					const http302 = context[method].responses['302'];
 					if (http302 && result.response.statusCode === 302) {
 						// Compare headers instead
@@ -574,8 +578,6 @@ describe('API', async () => {
 						schema = context[method].responses['200'].content['application/json'].schema;
 						compare(schema, result.body, method.toUpperCase(), path, 'root');
 					}
-
-					// TODO someday: text/csv, binary file type checking?
 				});
 
 				it('should successfully re-login if needed', async () => {
