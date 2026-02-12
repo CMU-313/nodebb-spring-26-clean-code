@@ -42,6 +42,26 @@ postsAPI.get = async function (caller, data) {
 		post.content = '[[topic:post-is-deleted]]';
 	}
 
+	if (post.anonymous === 1) {
+		const isAdmin = await user.isAdministrator(caller.uid);
+		if (isAdmin) {
+			post.isAnonymous = true;
+		} else {
+			post.uid = 0;
+			post.user = {
+				uid: 0,
+				username: 'Anonymous',
+				displayname: 'Anonymous',
+				userslug: '',
+				picture: '',
+				signature: '',
+				status: 'offline',
+				'icon:text': '?',
+				'icon:bgColor': '#aaa',
+			};
+		}
+	}
+
 	return post;
 };
 
