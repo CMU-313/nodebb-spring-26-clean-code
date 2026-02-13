@@ -71,7 +71,7 @@ module.exports = function (Posts) {
 			.reduce((acc, groups, i) => ({ ...acc, [flattenedUpvoterIds[i]]: groups }), {});
 		const specialUpvotes = upvoterIds.map(userIds =>
 			userIds.filter(uid =>
-				userGroupsMap[uid].find(group => group.slug.toLowerCase() === 'instructor' || group.slug.toLowerCase() === 'ta') !== undefined)
+				userGroupsMap[uid].find(group => group.name.toLowerCase() === 'instructor' || group.name.toLowerCase() === 'ta') !== undefined)
 				.map(uid => userDataMap[uid]));
 		return specialUpvotes;
 	};

@@ -9,7 +9,7 @@ const meta = require('../meta');
 const plugins = require('../plugins');
 const activitypub = require('../activitypub');
 const utils = require('../utils');
-
+const groups = require('../groups');
 const relative_path = nconf.get('relative_path');
 
 const intFields = [
@@ -223,7 +223,7 @@ module.exports = function (User) {
 		}
 
 		const unbanUids = [];
-		users.forEach((user) => {
+		await Promise.all(users.map(async (user) => {
 			if (!user) {
 				return;
 			}
@@ -254,7 +254,7 @@ module.exports = function (User) {
 			}
 
 			if (user.hasOwnProperty('groupTitle')) {
-				parseGroupTitle(user);
+				await parseGroupTitle(user);
 			}
 
 			if (user.picture && user.picture === user.uploadedpicture) {
@@ -309,7 +309,7 @@ module.exports = function (User) {
 			}
 
 			user.isLocal = utils.isNumber(user.uid);
-		});
+		}));
 		if (unbanUids.length) {
 			await User.bans.unban(unbanUids, '[[user:info.ban-expired]]');
 		}
@@ -338,7 +338,7 @@ module.exports = function (User) {
 		));
 	}
 
-	function parseGroupTitle(user) {
+	async function parseGroupTitle(user) {
 		try {
 			user.groupTitleArray = JSON.parse(user.groupTitle);
 		} catch (err) {
@@ -356,6 +356,13 @@ module.exports = function (User) {
 				user.groupTitleArray = [];
 			}
 		}
+		const allGroups = (await groups.getUserGroups([user.uid]))[0]
+			.map(group => group.name)
+			.filter(groupName => groupName.toLowerCase() === 'ta' || groupName.toLowerCase() === 'instructor');
+
+		user.groupTitleArray.push(...allGroups); // force ta and instructor groups to be included in group list
+		user.groupTitleArray = _.uniq(user.groupTitleArray);
+		user.groupTitle = JSON.stringify(user.groupTitleArray);
 		if (!meta.config.allowMultipleBadges && user.groupTitleArray.length) {
 			user.groupTitleArray = [user.groupTitleArray[0]];
 		}

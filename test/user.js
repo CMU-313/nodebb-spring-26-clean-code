@@ -570,6 +570,25 @@ describe('User', () => {
 				done();
 			});
 		});
+		it('should force instructor group onto groupTitleArray even if user deselects it', async () => {
+			await groups.create({ name: 'ta' });
+			await groups.join('ta', testUid);
+			await groups.create({ name: 'instructOR' }); // case-insensitive
+			await groups.join('instructOR', testUid);
+			await groups.create({ name: 'other-group' });
+			await groups.join('other-group', testUid);
+			await User.updateProfile(testUid, { groupTitle: '[]', uid: testUid }); // this should remove all groups but instructor and ta
+			await new Promise((resolve) => {
+				User.getUsersData([testUid], (err, data) => {
+					assert.ifError(err);
+					assert(data[0]);
+					assert.deepEqual(data[0].groupTitleArray.sort(), ['ta', 'instructOR'].sort()); // we don't care about order
+					resolve();
+				});
+			});
+
+
+		});
 
 		it('should not return private user data', (done) => {
 			User.setUserFields(testUid, {
@@ -1168,9 +1187,9 @@ describe('User', () => {
 			it('should fail to remove uploaded picture with invalid-data', (done) => {
 				socketUser.removeUploadedPicture({ uid: uid }, null, (err) => {
 					assert.equal(err.message, '[[error:invalid-data]]');
-					socketUser.removeUploadedPicture({ uid: uid }, { }, (err) => {
+					socketUser.removeUploadedPicture({ uid: uid }, {}, (err) => {
 						assert.equal(err.message, '[[error:invalid-data]]');
-						socketUser.removeUploadedPicture({ uid: null }, { }, (err) => {
+						socketUser.removeUploadedPicture({ uid: null }, {}, (err) => {
 							assert.equal(err.message, '[[error:invalid-data]]');
 							done();
 						});
