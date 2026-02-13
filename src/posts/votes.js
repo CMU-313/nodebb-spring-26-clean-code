@@ -203,10 +203,9 @@ module.exports = function (Posts) {
 				reputation: newReputation,
 			},
 			fromuid: uid,
-			post: postData,
+			post: { ...postData, endorsedVotes: endorsedData },
 			upvote: type === 'upvote' && !unvote,
 			downvote: type === 'downvote' && !unvote,
-			endorsedData,
 		};
 	}
 

@@ -52,7 +52,7 @@ describe('Post\'s', () => {
 	});
 
 	it('should update category teaser properly', async () => {
-		const getCategoriesAsync = async () => (await request.get(`${nconf.get('url')}/api/categories`, { })).body;
+		const getCategoriesAsync = async () => (await request.get(`${nconf.get('url')}/api/categories`, {})).body;
 		const postResult = await topics.post({ uid: globalModUid, cid: cid, title: 'topic title', content: '123456789' });
 
 		let data = await getCategoriesAsync();
@@ -160,6 +160,49 @@ describe('Post\'s', () => {
 			const data = await posts.hasVoted(postData.pid, voterUid);
 			assert.equal(data.upvoted, true);
 			assert.equal(data.downvoted, false);
+		});
+		it('voting as normal user should have post be returned as not endorsed', async () => {
+			const result = await apiPosts.upvote({ uid: voterUid }, { pid: postData.pid, room_id: 'topic_1' });
+			const newPostData = await posts.getPostData(result.post.pid);
+
+			assert.equal(result.post.upvotes, 1);
+			assert.equal(result.post.downvotes, 0);
+			assert.equal(result.post.votes, 1);
+			assert.equal(result.user.reputation, 1);
+			assert.deepEqual(result.post.endorsedVotes, []);
+			assert.deepEqual(newPostData.endorsedVotes, []);
+			await apiPosts.unvote({ uid: voterUid }, { pid: postData.pid, room_id: 'topic_1' }); // cleanup
+		});
+		it('voting as ta should have post be returned as endorsed', async () => {
+			await groups.create({ name: 'ta' });
+			await groups.join('ta', voterUid);
+			const result = await apiPosts.upvote({ uid: voterUid }, { pid: postData.pid, room_id: 'topic_1' });
+			const newPostData = await posts.getPostData(result.post.pid);
+			assert.equal(result.post.upvotes, 1);
+			assert.equal(result.post.downvotes, 0);
+			assert.equal(result.post.votes, 1);
+			assert.equal(result.user.reputation, 1);
+			assert.deepEqual(result.post.endorsedVotes, [
+				{
+					username: 'upvoter',
+					uid: 1,
+					fullname: undefined,
+					displayname: 'upvoter',
+					isLocal: true,
+				},
+			]
+			);
+			assert.deepEqual(newPostData.endorsedVotes, [
+				{
+					username: 'upvoter',
+					uid: 1,
+					fullname: undefined,
+					displayname: 'upvoter',
+					isLocal: true,
+				},
+			]
+			);
+
 		});
 
 		it('should add the pid to the :votes sorted set for that user', async () => {
@@ -1048,7 +1091,7 @@ describe('Post\'s', () => {
 			const oldValue = meta.config.groupsExemptFromPostQueue;
 			meta.config.groupsExemptFromPostQueue = ['registered-users'];
 			const uid = await user.create({ username: 'mergeexemptuser' });
-			const result = await apiTopics.create({ uid: uid, emit: () => {} }, { title: 'should not be queued', content: 'topic content', cid: cid });
+			const result = await apiTopics.create({ uid: uid, emit: () => { } }, { title: 'should not be queued', content: 'topic content', cid: cid });
 			assert.strictEqual(result.title, 'should not be queued');
 			meta.config.groupsExemptFromPostQueue = oldValue;
 		});

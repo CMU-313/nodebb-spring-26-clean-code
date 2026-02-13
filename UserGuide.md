@@ -15,7 +15,15 @@ A TA or instructor should be able to endorse posts and replies.
 
    ![alt text](readme-images/endorse-topic.png)
 
-#### Unit testing - TBD
+#### Unit testing
+
+Two new tests have been added to `test/posts.js`
+
+The test `voting as normal user should have post be returned as not endorsed` upvotes a post as a regular user and checks that the post has not been endorsed.
+
+The test `voting as ta should have post be returned as endorsed` has the user join a `ta` group first before upvoting the post. We then assert that the user has been added to the `endorsedVotes` list.
+
+This covers the backend code changes
 
 ### TA/Instructor badges
 
