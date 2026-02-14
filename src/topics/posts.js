@@ -164,27 +164,7 @@ module.exports = function (Topics) {
 		topicData.posts.forEach((post) => {
 			if (post) {
 				// Anonymize posts with anonymous flag for non-admin viewers
-				if (post.anonymous === 1) {
-					if (topicPrivileges.isAdmin === true) {
-						post.isAnonymous = true;
-					} else {
-						post.user = {
-							uid: 0,
-							username: 'Anonymous',
-							displayname: 'Anonymous',
-							userslug: '',
-							picture: '',
-							signature: '',
-							status: 'offline',
-							selectedGroups: [],
-							custom_profile_info: [],
-							'icon:text': '?',
-							'icon:bgColor': '#aaa',
-						};
-						post.editor = null;
-						post.selfPost = false;
-					}
-				}
+				posts.anonymizePost(post, topicPrivileges.isAdmin === true);
 
 				post.topicOwnerPost = parseInt(topicData.uid, 10) === parseInt(post.uid, 10);
 				post.display_edit_tools = topicPrivileges.isAdminOrMod || (post.selfPost && topicPrivileges['posts:edit']);

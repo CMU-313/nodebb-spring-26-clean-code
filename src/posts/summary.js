@@ -57,22 +57,7 @@ module.exports = function (Posts) {
 			Posts.overrideGuestHandle(post, post.handle);
 			post.handle = undefined;
 
-			if (post.anonymous === 1) {
-				if (isAdmin) {
-					post.isAnonymous = true;
-				} else {
-					post.user = {
-						uid: 0,
-						username: 'Anonymous',
-						displayname: 'Anonymous',
-						userslug: '',
-						picture: '',
-						status: 'offline',
-						'icon:text': '?',
-						'icon:bgColor': '#aaa',
-					};
-				}
-			}
+			Posts.anonymizePost(post, isAdmin);
 			post.topic = tidToTopic[post.tid];
 			post.category = post.topic && cidToCategory[post.topic.cid];
 			post.isMainPost = post.topic && post.pid === post.topic.mainPid;

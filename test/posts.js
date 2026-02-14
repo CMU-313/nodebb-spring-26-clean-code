@@ -1367,9 +1367,9 @@ describe('Post\'s', () => {
 		});
 
 		describe('Admin visibility', () => {
-			it('should expose real user data with isAnonymous flag for admins', async () => {
+			it('should expose real user data and preserve anonymous flag for admins', async () => {
 				const post = await apiPosts.get({ uid: adminUid }, { pid: anonPost.pid });
-				assert.strictEqual(post.isAnonymous, true);
+				assert.strictEqual(post.anonymous, 1);
 				assert.strictEqual(post.uid, regularUid);
 			});
 		});
@@ -1423,7 +1423,34 @@ describe('Post\'s', () => {
 				assert.strictEqual(anonPostResult.selfPost, false);
 			});
 
-			it('should set isAnonymous on anonymous posts in topic view for admins', () => {
+			it('should not set isAnonymous flag (removed)', () => {
+				const mockTopicData = {
+					uid: regularUid,
+					locked: false,
+					postSharing: [],
+					posts: [
+						{
+							anonymous: 1,
+							uid: regularUid,
+							user: { uid: regularUid, username: 'anon_regular', displayname: 'anon_regular' },
+							editor: null,
+							selfPost: false,
+							deleted: false,
+							index: 1,
+						},
+					],
+				};
+				topics.modifyPostsByPrivilege(mockTopicData, {
+					uid: adminUid,
+					isAdmin: true,
+					isAdminOrMod: true,
+					'posts:edit': true,
+					'posts:delete': true,
+				});
+				assert.strictEqual(mockTopicData.posts[0].isAnonymous, undefined);
+			});
+
+			it('should preserve real user data on anonymous posts in topic view for admins', () => {
 				const originalUser = { uid: regularUid, username: 'anon_regular', displayname: 'anon_regular' };
 				const mockTopicData = {
 					uid: regularUid,
@@ -1449,9 +1476,45 @@ describe('Post\'s', () => {
 					'posts:delete': true,
 				});
 				const anonPostResult = mockTopicData.posts[0];
-				assert.strictEqual(anonPostResult.isAnonymous, true);
+				assert.strictEqual(anonPostResult.anonymous, 1);
 				assert.strictEqual(anonPostResult.user.uid, regularUid);
 				assert.strictEqual(anonPostResult.user.username, 'anon_regular');
+			});
+		});
+
+		describe('Replies endpoint masking', () => {
+			let parentPost;
+			let anonReply;
+
+			before(async () => {
+				parentPost = await topics.reply({
+					uid: adminUid,
+					tid: anonTopicData.topicData.tid,
+					content: 'parent post for reply test',
+				});
+				anonReply = await topics.reply({
+					uid: regularUid,
+					tid: anonTopicData.topicData.tid,
+					content: 'anonymous reply to parent',
+					anonymous: true,
+					toPid: parentPost.pid,
+				});
+			});
+
+			it('should mask anonymous replies for regular users via getReplies', async () => {
+				const replies = await apiPosts.getReplies({ uid: regularUid }, { pid: parentPost.pid });
+				const reply = replies.find(r => r.pid === anonReply.pid);
+				assert(reply, 'anonymous reply should be in replies');
+				assert.strictEqual(reply.user.username, 'Anonymous');
+				assert.strictEqual(reply.user.uid, 0);
+			});
+
+			it('should expose real user data on anonymous replies for admins via getReplies', async () => {
+				const replies = await apiPosts.getReplies({ uid: adminUid }, { pid: parentPost.pid });
+				const reply = replies.find(r => r.pid === anonReply.pid);
+				assert(reply, 'anonymous reply should be in replies');
+				assert.strictEqual(reply.anonymous, 1);
+				assert.strictEqual(reply.user.uid, regularUid);
 			});
 		});
 	});

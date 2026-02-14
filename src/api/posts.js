@@ -44,22 +44,7 @@ postsAPI.get = async function (caller, data) {
 
 	if (post.anonymous === 1) {
 		const isAdmin = await user.isAdministrator(caller.uid);
-		if (isAdmin) {
-			post.isAnonymous = true;
-		} else {
-			post.uid = 0;
-			post.user = {
-				uid: 0,
-				username: 'Anonymous',
-				displayname: 'Anonymous',
-				userslug: '',
-				picture: '',
-				signature: '',
-				status: 'offline',
-				'icon:text': '?',
-				'icon:bgColor': '#aaa',
-			};
-		}
+		posts.anonymizePost(post, isAdmin);
 	}
 
 	return post;
@@ -591,7 +576,11 @@ postsAPI.getReplies = async (caller, { pid }) => {
 		privileges.posts.get(pids, uid),
 	]);
 	postData = await topics.addPostData(postData, uid);
-	postData.forEach((postData, index) => posts.modifyPostByPrivilege(postData, postPrivileges[index]));
+	const isAdmin = await user.isAdministrator(uid);
+	postData.forEach((postData, index) => {
+		posts.modifyPostByPrivilege(postData, postPrivileges[index]);
+		posts.anonymizePost(postData, isAdmin);
+	});
 	postData = postData.filter((postData, index) => postData && postPrivileges[index].read);
 	postData = await user.blocks.filter(uid, postData);
 
