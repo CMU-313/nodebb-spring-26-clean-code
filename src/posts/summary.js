@@ -10,7 +10,6 @@ const user = require('../user');
 const plugins = require('../plugins');
 const categories = require('../categories');
 const utils = require('../utils');
-const privileges = require('../privileges');
 
 module.exports = function (Posts) {
 	Posts.getPostSummaryByPids = async function (pids, uid, options) {
@@ -41,7 +40,7 @@ module.exports = function (Posts) {
 		const tidToTopic = toObject('tid', topicsAndCategories.topics);
 		const cidToCategory = toObject('cid', topicsAndCategories.categories);
 
-		const isAdmin = await privileges.users.isAdministrator(uid);
+		const isAdmin = await user.isAdministrator(uid);
 
 		posts.forEach((post) => {
 			// If the post author isn't represented in the retrieved users' data,

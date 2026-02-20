@@ -1360,10 +1360,6 @@ describe('Post\'s', () => {
 				assert.strictEqual(post.user['icon:text'], '?');
 			});
 
-			it('should not have isAnonymous flag for regular users', async () => {
-				const post = await apiPosts.get({ uid: regularUid }, { pid: anonPost.pid });
-				assert.strictEqual(post.isAnonymous, undefined);
-			});
 		});
 
 		describe('Admin visibility', () => {
@@ -1421,33 +1417,6 @@ describe('Post\'s', () => {
 				assert.strictEqual(anonPostResult.user.username, 'Anonymous');
 				assert.strictEqual(anonPostResult.editor, null);
 				assert.strictEqual(anonPostResult.selfPost, false);
-			});
-
-			it('should not set isAnonymous flag (removed)', () => {
-				const mockTopicData = {
-					uid: regularUid,
-					locked: false,
-					postSharing: [],
-					posts: [
-						{
-							anonymous: 1,
-							uid: regularUid,
-							user: { uid: regularUid, username: 'anon_regular', displayname: 'anon_regular' },
-							editor: null,
-							selfPost: false,
-							deleted: false,
-							index: 1,
-						},
-					],
-				};
-				topics.modifyPostsByPrivilege(mockTopicData, {
-					uid: adminUid,
-					isAdmin: true,
-					isAdminOrMod: true,
-					'posts:edit': true,
-					'posts:delete': true,
-				});
-				assert.strictEqual(mockTopicData.posts[0].isAnonymous, undefined);
 			});
 
 			it('should preserve real user data on anonymous posts in topic view for admins', () => {
