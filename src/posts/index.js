@@ -95,6 +95,27 @@ Posts.getPostIndices = async function (posts, uid) {
 	return indices.map(index => (utils.isNumber(index) ? parseInt(index, 10) + 1 : 0));
 };
 
+Posts.anonymizePost = function (post, isAdmin) {
+	if (post && post.anonymous === 1 && !isAdmin) {
+		post.uid = 0;
+		post.user = {
+			uid: 0,
+			username: 'Anonymous',
+			displayname: 'Anonymous',
+			userslug: '',
+			picture: '',
+			signature: '',
+			status: 'offline',
+			selectedGroups: [],
+			custom_profile_info: [],
+			'icon:text': '?',
+			'icon:bgColor': '#aaa',
+		};
+		post.editor = null;
+		post.selfPost = false;
+	}
+};
+
 Posts.modifyPostByPrivilege = function (post, privileges) {
 	if (post && post.deleted && !(post.selfPost || privileges['posts:view_deleted'])) {
 		post.content = '[[topic:post-is-deleted]]';

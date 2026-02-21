@@ -163,6 +163,9 @@ module.exports = function (Topics) {
 		const loggedIn = parseInt(topicPrivileges.uid, 10) > 0;
 		topicData.posts.forEach((post) => {
 			if (post) {
+				// Anonymize posts with anonymous flag for non-admin viewers
+				posts.anonymizePost(post, topicPrivileges.isAdmin === true);
+
 				post.topicOwnerPost = parseInt(topicData.uid, 10) === parseInt(post.uid, 10);
 				post.display_edit_tools = topicPrivileges.isAdminOrMod || (post.selfPost && topicPrivileges['posts:edit']);
 				post.display_delete_tools = topicPrivileges.isAdminOrMod || (post.selfPost && topicPrivileges['posts:delete']);
