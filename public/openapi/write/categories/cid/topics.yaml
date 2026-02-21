@@ -49,6 +49,7 @@ get:
         type: string
       required: false
       description: Topic tag to filter by
+      example: ''
   responses:
     '200':
       description: ''
