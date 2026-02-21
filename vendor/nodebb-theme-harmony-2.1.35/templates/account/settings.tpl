@@ -209,25 +209,25 @@
 		{{{ end }}}
 
 		<h6 class="fw-bold">[[topic:watch]]</h6>
-		<div>
-			<div class="form-check form-switch">
-				<input class="form-check-input" type="checkbox" role="switch" id="followTopicsOnCreate" data-property="followTopicsOnCreate" {{{ if settings.followTopicsOnCreate }}}checked{{{ end }}}/>
-				<label class="form-check-label text-sm" for="followTopicsOnCreate">[[user:follow-topics-you-create]]</label>
-			</div>
-			<div class="form-check form-switch">
-				<input class="form-check-input" type="checkbox" role="switch" id="followTopicsOnReply" data-property="followTopicsOnReply" {{{ if settings.followTopicsOnReply }}}checked{{{ end }}}/>
-				<label class="form-check-label text-sm" for="followTopicsOnReply">[[user:follow-topics-you-reply-to]]</label>
-			</div>
-			<div class="mb-2">
-				<label class="form-label text-sm" for="categoryWatchState">[[user:default-category-watch-state]]</label>
-				<select class="form-select form-select-sm" id="categoryWatchState" data-property="categoryWatchState">
-					<option value="tracking" {{{ if categoryWatchState.tracking }}}selected{{{ end }}}>[[category:tracking]]</option>
-					<option value="notwatching" {{{ if categoryWatchState.notwatching }}}selected{{{ end }}}>[[category:not-watching]]</option>
-					<option value="ignoring" {{{ if categoryWatchState.ignoring }}}selected{{{ end }}}>[[category:ignoring]]</option>
-				</select>
-			</div>
-		</div>
-		<hr/>
+        </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="followTopicsOnReply" data-property="followTopicsOnReply" {{{ if settings.followTopicsOnReply }}}checked{{{ end }}}/>
+                <label class="form-check-label text-sm" for="followTopicsOnReply">[[user:follow-topics-you-reply-to]]</label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="categoryGroupedView" data-property="categoryGroupedView" {{{ if settings.categoryGroupedView }}}checked{{{ end }}}/>
+                <label class="form-check-label text-sm" for="categoryGroupedView">[[user:group-topics-by-date]]</label>
+            </div>
+            <div class="mb-2">
+                <label class="form-label text-sm" for="categoryWatchState">[[user:default-category-watch-state]]</label>
+                <select class="form-select form-select-sm" id="categoryWatchState" data-property="categoryWatchState">
+                    <option value="tracking" {{{ if categoryWatchState.tracking }}}selected{{{ end }}}>[[category:tracking]]</option>
+                    <option value="notwatching" {{{ if categoryWatchState.notwatching }}}selected{{{ end }}}>[[category:not-watching]]</option>
+                    <option value="ignoring" {{{ if categoryWatchState.ignoring }}}selected{{{ end }}}>[[category:ignoring]]</option>
+                </select>
+            </div>
+        </div>
+        <hr/>
 
 		<h6 class="fw-bold">[[user:notifications]]</h6>
 		<div>
