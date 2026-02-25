@@ -32,14 +32,16 @@ describe('Date Grouping', () => {
 		});
 
 		it('should group topics by "Today"', () => {
-			const now = Date.now();
+			const now = new Date();
+			// Use noon today to avoid midnight boundary issues in CI
+			const noonToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0).getTime();
 			const topics = [
-				{ tid: 1, title: 'Topic 1', timestamp: now, pinned: false },
-				{ tid: 2, title: 'Topic 2', timestamp: now - 1000 * 60 * 60, pinned: false },
+				{ tid: 1, title: 'Topic 1', timestamp: noonToday, pinned: false },
+				{ tid: 2, title: 'Topic 2', timestamp: noonToday - 1000 * 60 * 30, pinned: false }, // 30 min earlier, still today
 			];
-
+		
 			const result = dateGrouping.groupTopicsByDateRange(topics);
-			
+		
 			assert.strictEqual(result[0].label, 'Today');
 			assert.strictEqual(result[0].topics.length, 2);
 		});
