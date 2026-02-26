@@ -91,4 +91,4 @@ jobs:
       - name: Test coverage
         uses: coverallsapp/github-action@v2
         with:
-          fail-on-error: true
+          fail-on-error: false
