@@ -1716,34 +1716,37 @@ describe('Controllers', () => {
 			await meta.configs.set('allowAnonymousPosts', oldAllowAnonymousPosts);
 		});
 
+		const anonymousCheckboxRegex = /<input[^>]*id="allowAnonymousPosts"[^>]*>/;
+		const anonymousCheckboxCheckedRegex = /<input[^>]*id="allowAnonymousPosts"[^>]*\schecked(?:\s|>|=)/;
+
 		it('should reflect allowAnonymousPosts=true in admin post settings checkbox', async () => {
 			await meta.configs.set('allowAnonymousPosts', 1);
 			const { response, body } = await request.get(`${nconf.get('url')}/admin/settings/post`, { jar: adminJar });
 			assert.equal(response.statusCode, 200);
-			assert(body.includes('id="allowAnonymousPosts"'));
-			assert(body.includes('id="allowAnonymousPosts" data-field="allowAnonymousPosts" checked'));
+			assert(anonymousCheckboxRegex.test(body));
+			assert(anonymousCheckboxCheckedRegex.test(body));
 		});
 
 		it('should reflect allowAnonymousPosts=false in admin post settings checkbox', async () => {
 			await meta.configs.set('allowAnonymousPosts', 0);
 			const { response, body } = await request.get(`${nconf.get('url')}/admin/settings/post`, { jar: adminJar });
 			assert.equal(response.statusCode, 200);
-			assert(body.includes('id="allowAnonymousPosts"'));
-			assert(!body.includes('id="allowAnonymousPosts" data-field="allowAnonymousPosts" checked'));
+			assert(anonymousCheckboxRegex.test(body));
+			assert(!anonymousCheckboxCheckedRegex.test(body));
 		});
 
 		it('should reflect allowAnonymousPosts boolean true in admin post settings checkbox', async () => {
 			await meta.configs.set('allowAnonymousPosts', true);
 			const { response, body } = await request.get(`${nconf.get('url')}/admin/settings/post`, { jar: adminJar });
 			assert.equal(response.statusCode, 200);
-			assert(body.includes('id="allowAnonymousPosts" data-field="allowAnonymousPosts" checked'));
+			assert(anonymousCheckboxCheckedRegex.test(body));
 		});
 
 		it('should reflect allowAnonymousPosts="on" in admin post settings checkbox', async () => {
 			await meta.configs.set('allowAnonymousPosts', 'on');
 			const { response, body } = await request.get(`${nconf.get('url')}/admin/settings/post`, { jar: adminJar });
 			assert.equal(response.statusCode, 200);
-			assert(body.includes('id="allowAnonymousPosts" data-field="allowAnonymousPosts" checked'));
+			assert(anonymousCheckboxCheckedRegex.test(body));
 		});
 	});
 
