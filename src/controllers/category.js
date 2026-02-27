@@ -16,6 +16,7 @@ const helpers = require('./helpers');
 const utils = require('../utils');
 const translator = require('../translator');
 const analytics = require('../analytics');
+const dateGrouping = require('../topics/dateGrouping');
 
 const categoryController = module.exports;
 
@@ -185,7 +186,14 @@ categoryController.get = async function (req, res, next) {
 			categoryData.url = categoryData.cid;
 		}
 	}
-
+	// Group topics by date range if user has categoryGroupedView enabled
+	if (userSettings.categoryGroupedView && categoryData.topics && categoryData.topics.length) {
+		categoryData.grouped = true;
+		categoryData.dateGroups = dateGrouping.groupTopicsByDateRange(categoryData.topics);
+	} else {
+		categoryData.grouped = false;
+	}
+	
 	res.render('category', categoryData);
 };
 
