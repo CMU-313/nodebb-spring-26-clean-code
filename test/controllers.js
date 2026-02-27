@@ -1720,6 +1720,14 @@ describe('Controllers', () => {
 		const anonymousCheckboxCheckedRegex = /<input(?=[^>]*id="allowAnonymousPosts")(?=[^>]*\bchecked\b)[^>]*>/;
 
 		it('should reflect allowAnonymousPosts=true in admin post settings checkbox', async () => {
+			await meta.configs.set('allowAnonymousPosts', true);
+			const { response, body } = await request.get(`${nconf.get('url')}/admin/settings/post`, { jar: adminJar });
+			assert.equal(response.statusCode, 200);
+			assert(anonymousCheckboxRegex.test(body));
+			assert(anonymousCheckboxCheckedRegex.test(body));
+		});
+
+		it('should reflect allowAnonymousPosts=1 in admin post settings checkbox', async () => {
 			await meta.configs.set('allowAnonymousPosts', 1);
 			const { response, body } = await request.get(`${nconf.get('url')}/admin/settings/post`, { jar: adminJar });
 			assert.equal(response.statusCode, 200);
@@ -1728,26 +1736,13 @@ describe('Controllers', () => {
 		});
 
 		it('should reflect allowAnonymousPosts=false in admin post settings checkbox', async () => {
-			await meta.configs.set('allowAnonymousPosts', 0);
+			await meta.configs.set('allowAnonymousPosts', false);
 			const { response, body } = await request.get(`${nconf.get('url')}/admin/settings/post`, { jar: adminJar });
 			assert.equal(response.statusCode, 200);
 			assert(anonymousCheckboxRegex.test(body));
 			assert(!anonymousCheckboxCheckedRegex.test(body));
 		});
 
-		it('should reflect allowAnonymousPosts boolean true in admin post settings checkbox', async () => {
-			await meta.configs.set('allowAnonymousPosts', true);
-			const { response, body } = await request.get(`${nconf.get('url')}/admin/settings/post`, { jar: adminJar });
-			assert.equal(response.statusCode, 200);
-			assert(anonymousCheckboxCheckedRegex.test(body));
-		});
-
-		it('should reflect allowAnonymousPosts="on" in admin post settings checkbox', async () => {
-			await meta.configs.set('allowAnonymousPosts', 'on');
-			const { response, body } = await request.get(`${nconf.get('url')}/admin/settings/post`, { jar: adminJar });
-			assert.equal(response.statusCode, 200);
-			assert(anonymousCheckboxCheckedRegex.test(body));
-		});
 	});
 
 	describe('admin middlewares', () => {
@@ -1790,7 +1785,7 @@ describe('Controllers', () => {
 
 		it('should render anonymous checkbox below a growing textarea in composer when enabled', async () => {
 			oldAllowAnonymousPosts = meta.config.allowAnonymousPosts;
-			await meta.configs.set('allowAnonymousPosts', 1);
+			await meta.configs.set('allowAnonymousPosts', true);
 
 			const { response, body } = await request.get(`${nconf.get('url')}/compose?cid=${cid}`, { jar });
 			assert.equal(response.statusCode, 200);
@@ -1802,7 +1797,7 @@ describe('Controllers', () => {
 		});
 
 		it('should hide anonymous checkbox in composer when disabled', async () => {
-			await meta.configs.set('allowAnonymousPosts', 0);
+			await meta.configs.set('allowAnonymousPosts', false);
 
 			const { response, body } = await request.get(`${nconf.get('url')}/compose?cid=${cid}`, { jar });
 			assert.equal(response.statusCode, 200);
@@ -1817,13 +1812,15 @@ describe('Controllers', () => {
 			assert(body.includes('type="checkbox" name="anonymous"'));
 		});
 
-		it('should render anonymous checkbox in composer when allowAnonymousPosts="on"', async () => {
-			await meta.configs.set('allowAnonymousPosts', 'on');
+		it('should render anonymous checkbox in composer when allowAnonymousPosts=1', async () => {
+			await meta.configs.set('allowAnonymousPosts', 1);
 
 			const { response, body } = await request.get(`${nconf.get('url')}/compose?cid=${cid}`, { jar });
 			assert.equal(response.statusCode, 200);
 			assert(body.includes('type="checkbox" name="anonymous"'));
 		});
+
+
 
 		it('should load the composer route if disabled by plugin', async () => {
 			function hookMethod(hookData, callback) {
@@ -1873,7 +1870,7 @@ describe('Controllers', () => {
 
 
 		it('should persist anonymous flag for topic and reply created by composer route', async () => {
-			await meta.configs.set('allowAnonymousPosts', 1);
+			await meta.configs.set('allowAnonymousPosts', true);
 
 			const topicTitle = `anonymous topic ${Date.now()}`;
 			const topicResult = await request.post(`${nconf.get('url')}/compose`, {
