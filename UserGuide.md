@@ -52,3 +52,12 @@ In `test/user.js`, I wrote the test 'should force instructor group onto groupTit
 just have a title status indicator for now, if resolved
 
 top-level resolved: property, put the PID (link?)
+
+make a topic of type note
+make a topic of type question (i mean it is a post technically...)
+
+get the topic as poster
+get the topic as non-poster
+
+mark a post as answer
+get the topic data again

@@ -148,7 +148,7 @@ function modifyTopic(topic, fields) {
 			topic.thumbs = [];
 		}
 	}
-	if (!topic.type) {
+	if (!topic.type && (fields.length === 0 || fields.includes('type'))) { // we're expecting this field
 		topic.type = 'question';
 	}
 }
