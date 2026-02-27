@@ -226,6 +226,7 @@ plugin.filterComposerBuild = async function (hookData) {
 			canSchedule: canScheduleTopics,
 			showHandleInput: meta.config.allowGuestHandles === 1 &&
 				(req.uid === 0 || (isEditing && isGuestPost && (isAdmin || isMod))),
+			showAnonymousToggle: [1, '1', true, 'true', 'on'].includes(meta.config.allowAnonymousPosts),
 			handle: postData ? postData.handle || '' : undefined,
 			formatting: formatting,
 			isAdminOrMod: isAdmin || isMod,
