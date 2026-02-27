@@ -59,6 +59,8 @@ get:
                 type: boolean
               allowGuestHandles:
                 type: boolean
+              allowAnonymousPosts:
+                type: boolean
               allowTopicsThumbnail:
                 type: boolean
               usePagination:
