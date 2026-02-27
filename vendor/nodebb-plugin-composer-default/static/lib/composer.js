@@ -104,7 +104,7 @@ define('composer', [
 	}
 
 	function anonymousPostingEnabled() {
-		return [1, '1', true, 'true', 'on'].includes(config.allowAnonymousPosts);
+		return config.allowAnonymousPosts === true;
 	}
 
 	function alreadyOpen(post) {
