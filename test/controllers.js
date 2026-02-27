@@ -1701,6 +1701,41 @@ describe('Controllers', () => {
 		});
 	});
 
+
+	describe('admin settings', () => {
+		let adminJar;
+		let oldAllowAnonymousPosts;
+
+		before(async () => {
+			const login = await helpers.loginUser('admin', 'barbar');
+			adminJar = login.jar;
+			oldAllowAnonymousPosts = meta.config.allowAnonymousPosts;
+		});
+
+		after(async () => {
+			await meta.configs.set('allowAnonymousPosts', oldAllowAnonymousPosts);
+		});
+
+		const anonymousCheckboxRegex = /<input[^>]*id="allowAnonymousPosts"[^>]*>/;
+		const anonymousCheckboxCheckedRegex = /<input(?=[^>]*id="allowAnonymousPosts")(?=[^>]*\bchecked\b)[^>]*>/;
+
+		it('should reflect allowAnonymousPosts=true in admin post settings checkbox', async () => {
+			await meta.configs.set('allowAnonymousPosts', true);
+			const { response, body } = await request.get(`${nconf.get('url')}/admin/settings/post`, { jar: adminJar });
+			assert.equal(response.statusCode, 200);
+			assert(anonymousCheckboxRegex.test(body));
+			assert(anonymousCheckboxCheckedRegex.test(body));
+		});
+
+		it('should reflect allowAnonymousPosts=false in admin post settings checkbox', async () => {
+			await meta.configs.set('allowAnonymousPosts', false);
+			const { response, body } = await request.get(`${nconf.get('url')}/admin/settings/post`, { jar: adminJar });
+			assert.equal(response.statusCode, 200);
+			assert(anonymousCheckboxRegex.test(body));
+			assert(!anonymousCheckboxCheckedRegex.test(body));
+		});
+	});
+
 	describe('admin middlewares', () => {
 		it('should redirect to login', async () => {
 			const { response } = await request.get(`${nconf.get('url')}/api/admin/advanced/database`);
@@ -1717,11 +1752,16 @@ describe('Controllers', () => {
 	describe('composer', () => {
 		let csrf_token;
 		let jar;
+		let oldAllowAnonymousPosts;
 
 		before(async () => {
 			const login = await helpers.loginUser('foo', 'barbar');
 			jar = login.jar;
 			csrf_token = login.csrf_token;
+		});
+
+		after(async () => {
+			await meta.configs.set('allowAnonymousPosts', oldAllowAnonymousPosts);
 		});
 
 		it('should load the composer route', async () => {
@@ -1733,6 +1773,36 @@ describe('Controllers', () => {
 			assert(body.template);
 			assert.equal(body.url, `${nconf.get('relative_path')}/compose`);
 		});
+
+		it('should render anonymous checkbox below a growing textarea in composer when enabled', async () => {
+			oldAllowAnonymousPosts = meta.config.allowAnonymousPosts;
+			await meta.configs.set('allowAnonymousPosts', true);
+
+			const { response, body } = await request.get(`${nconf.get('url')}/compose?cid=${cid}`, { jar });
+			assert.equal(response.statusCode, 200);
+			assert(body.includes('class="write shadow-none rounded-1 w-100 form-control flex-grow-1"'));
+			assert(body.includes('type="checkbox" name="anonymous"'));
+			assert(body.indexOf('textarea class="write') < body.indexOf('name="anonymous"'));
+			assert(body.includes('rows="12"'));
+			assert(body.includes('style="min-height: 14rem;"'));
+		});
+
+		it('should hide anonymous checkbox in composer when disabled', async () => {
+			await meta.configs.set('allowAnonymousPosts', false);
+
+			const { response, body } = await request.get(`${nconf.get('url')}/compose?cid=${cid}`, { jar });
+			assert.equal(response.statusCode, 200);
+			assert(!body.includes('name="anonymous"'));
+		});
+
+		it('should render anonymous checkbox in composer when allowAnonymousPosts=true', async () => {
+			await meta.configs.set('allowAnonymousPosts', true);
+
+			const { response, body } = await request.get(`${nconf.get('url')}/compose?cid=${cid}`, { jar });
+			assert.equal(response.statusCode, 200);
+			assert(body.includes('type="checkbox" name="anonymous"'));
+		});
+
 
 		it('should load the composer route if disabled by plugin', async () => {
 			function hookMethod(hookData, callback) {
@@ -1778,6 +1848,52 @@ describe('Controllers', () => {
 				},
 			});
 			assert.equal(result.response.statusCode, 400);
+		});
+
+
+		it('should persist anonymous flag for topic and reply created by composer route', async () => {
+			await meta.configs.set('allowAnonymousPosts', true);
+
+			const topicTitle = `anonymous topic ${Date.now()}`;
+			const topicResult = await request.post(`${nconf.get('url')}/compose`, {
+				body: {
+					cid: cid,
+					title: topicTitle,
+					content: 'anonymous topic content',
+					anonymous: 'on',
+				},
+				jar: jar,
+				maxRedirect: 0,
+				redirect: 'manual',
+				headers: {
+					'x-csrf-token': csrf_token,
+				},
+			});
+
+			assert.equal(topicResult.response.statusCode, 302);
+			const topicPath = topicResult.response.headers.location;
+			const topicTid = parseInt(topicPath.split('/topic/')[1].split('/')[0], 10);
+			const mainPid = await topics.getTopicField(topicTid, 'mainPid');
+			assert.strictEqual(await posts.getPostField(mainPid, 'anonymous'), 1);
+
+			const replyResult = await request.post(`${nconf.get('url')}/compose`, {
+				body: {
+					tid: topicTid,
+					content: 'anonymous reply',
+					anonymous: 'on',
+				},
+				jar: jar,
+				maxRedirect: 0,
+				redirect: 'manual',
+				headers: {
+					'x-csrf-token': csrf_token,
+				},
+			});
+
+			assert.equal(replyResult.response.statusCode, 302);
+			const replyPath = replyResult.response.headers.location;
+			const replyPid = parseInt(replyPath.split('/post/')[1], 10);
+			assert.strictEqual(await posts.getPostField(replyPid, 'anonymous'), 1);
 		});
 
 		it('should create a new topic and reply by composer route', async () => {
