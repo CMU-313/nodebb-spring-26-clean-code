@@ -1731,6 +1731,13 @@ describe('Controllers', () => {
 			assert(body.includes('id="allowAnonymousPosts"'));
 			assert(!body.includes('id="allowAnonymousPosts" data-field="allowAnonymousPosts" checked'));
 		});
+
+		it('should reflect allowAnonymousPosts boolean true in admin post settings checkbox', async () => {
+			await meta.configs.set('allowAnonymousPosts', true);
+			const { response, body } = await request.get(`${nconf.get('url')}/admin/settings/post`, { jar: adminJar });
+			assert.equal(response.statusCode, 200);
+			assert(body.includes('id="allowAnonymousPosts" data-field="allowAnonymousPosts" checked'));
+		});
 	});
 
 	describe('admin middlewares', () => {
@@ -1777,7 +1784,9 @@ describe('Controllers', () => {
 
 			const { response, body } = await request.get(`${nconf.get('url')}/compose?cid=${cid}`, { jar });
 			assert.equal(response.statusCode, 200);
-			assert(body.includes('name="anonymous"'));
+			assert(body.includes('type="checkbox" name="anonymous"'));
+			assert(body.includes('rows="12"'));
+			assert(body.includes('style="min-height: 14rem;"'));
 		});
 
 		it('should hide anonymous checkbox in composer when disabled', async () => {
@@ -1786,6 +1795,14 @@ describe('Controllers', () => {
 			const { response, body } = await request.get(`${nconf.get('url')}/compose?cid=${cid}`, { jar });
 			assert.equal(response.statusCode, 200);
 			assert(!body.includes('name="anonymous"'));
+		});
+
+		it('should render anonymous checkbox in composer when allowAnonymousPosts=true', async () => {
+			await meta.configs.set('allowAnonymousPosts', true);
+
+			const { response, body } = await request.get(`${nconf.get('url')}/compose?cid=${cid}`, { jar });
+			assert.equal(response.statusCode, 200);
+			assert(body.includes('type="checkbox" name="anonymous"'));
 		});
 
 		it('should load the composer route if disabled by plugin', async () => {
