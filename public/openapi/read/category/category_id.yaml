@@ -68,7 +68,7 @@ get:
                     type: string
                   selectCategoryLabel:
                     type: string
-                    description: Label to use for the category selector
+                    description: "Label to use for the category selector"
                   privileges:
                     type: object
                     properties:
@@ -121,9 +121,26 @@ get:
                     type: string
                   handleFull:
                     type: string
-                    description: |
+                    description: |-
                       The full webfinger addressable handle for the category.
                       This property is only present if the category privileges allow it to be accessed by the "fediverse" pseudo-user.
+                  grouped:
+                    type: boolean
+                    description: Whether topics are being displayed in grouped/date-based view
+                  dateGroups:
+                    type: array
+                    description: Topics organized by date groups (Today, This Week, etc.). Only present when grouped is true.
+                    items:
+                      type: object
+                      properties:
+                        label:
+                          type: string
+                          description: The display label for this date group
+                        topics:
+                          type: array
+                          description: Array of topics belonging to this date group
+                          items:
+                            $ref: ../../components/schemas/TopicObject.yaml#/TopicObject
               - $ref: ../../components/schemas/Pagination.yaml#/Pagination
               - $ref: ../../components/schemas/Breadcrumbs.yaml#/Breadcrumbs
               - $ref: ../../components/schemas/CommonProps.yaml#/CommonProps
