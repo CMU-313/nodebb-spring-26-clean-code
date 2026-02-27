@@ -103,7 +103,7 @@ settingsController.post = async (req, res) => {
 	res.render('admin/settings/post', {
 		title: '[[admin/menu:settings/post]]',
 		groupsExemptFromPostQueue: groupData,
-		allowAnonymousPosts: [1, '1', true, 'true'].includes(meta.config.allowAnonymousPosts),
+		allowAnonymousPosts: [1, '1', true, 'true', 'on'].includes(meta.config.allowAnonymousPosts),
 	});
 };
 
