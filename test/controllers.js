@@ -1701,6 +1701,38 @@ describe('Controllers', () => {
 		});
 	});
 
+
+	describe('admin settings', () => {
+		let adminJar;
+		let oldAllowAnonymousPosts;
+
+		before(async () => {
+			const login = await helpers.loginUser('admin', 'barbar');
+			adminJar = login.jar;
+			oldAllowAnonymousPosts = meta.config.allowAnonymousPosts;
+		});
+
+		after(async () => {
+			await meta.configs.set('allowAnonymousPosts', oldAllowAnonymousPosts);
+		});
+
+		it('should reflect allowAnonymousPosts=true in admin post settings checkbox', async () => {
+			await meta.configs.set('allowAnonymousPosts', 1);
+			const { response, body } = await request.get(`${nconf.get('url')}/admin/settings/post`, { jar: adminJar });
+			assert.equal(response.statusCode, 200);
+			assert(body.includes('id="allowAnonymousPosts"'));
+			assert(body.includes('id="allowAnonymousPosts" data-field="allowAnonymousPosts" checked'));
+		});
+
+		it('should reflect allowAnonymousPosts=false in admin post settings checkbox', async () => {
+			await meta.configs.set('allowAnonymousPosts', 0);
+			const { response, body } = await request.get(`${nconf.get('url')}/admin/settings/post`, { jar: adminJar });
+			assert.equal(response.statusCode, 200);
+			assert(body.includes('id="allowAnonymousPosts"'));
+			assert(!body.includes('id="allowAnonymousPosts" data-field="allowAnonymousPosts" checked'));
+		});
+	});
+
 	describe('admin middlewares', () => {
 		it('should redirect to login', async () => {
 			const { response } = await request.get(`${nconf.get('url')}/api/admin/advanced/database`);
