@@ -9,6 +9,7 @@ const groups = require('../groups');
 const privileges = require('../privileges');
 const activitypub = require('../activitypub');
 const utils = require('../utils');
+const dateGrouping = require('../topics/dateGrouping');
 
 const categoriesAPI = module.exports;
 
@@ -152,7 +153,12 @@ categoriesAPI.getTopics = async (caller, data) => {
 	});
 	categories.modifyTopicsByPrivilege(result.topics, userPrivileges);
 
-	return { ...result, privileges: userPrivileges };
+	if (settings.categoryGroupedView) {
+		const dateGroups = dateGrouping.groupTopicsByDateRange(result.topics);
+		return { ...result, privileges: userPrivileges, grouped: true, dateGroups };
+	}
+
+	return { ...result, privileges: userPrivileges, grouped: false };
 };
 
 categoriesAPI.setWatchState = async (caller, { cid, state, uid }) => {
