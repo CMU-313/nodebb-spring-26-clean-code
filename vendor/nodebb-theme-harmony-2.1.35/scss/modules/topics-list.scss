@@ -72,3 +72,69 @@ ul.categories-list {
     }
   }
 }
+
+// Date group styles for grouped category view
+.date-group {
+    .date-group-header {
+        background-color: rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        transition: background-color 0.15s ease;
+        cursor: pointer;
+
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.06);
+        }
+
+        &:active {
+            background-color: rgba(0, 0, 0, 0.08);
+        }
+    }
+
+    .date-group-chevron {
+        transition: transform 0.25s ease;
+        font-size: 0.75rem;
+        width: 1rem;
+        text-align: center;
+
+        &.collapsed {
+            transform: rotate(-90deg);
+        }
+    }
+   // Smooth collapse animation
+    .collapse {
+        transition: height 0.3s ease;
+    }
+
+    .collapsing {
+        transition: height 0.3s ease;
+    }
+
+    // Ensure grouped topic lists maintain same styling as flat list
+    .date-group-topics {
+        margin-bottom: 0;
+
+        li {
+            &:last-child {
+                border-bottom: none !important;
+            }
+        }
+    }
+}
+
+// Dark mode support
+[data-bs-theme="dark"] {
+    .date-group {
+        .date-group-header {
+            background-color: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.06);
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.06);
+            }
+
+            &:active {
+                background-color: rgba(255, 255, 255, 0.08);
+            }
+        }
+    }
+}
