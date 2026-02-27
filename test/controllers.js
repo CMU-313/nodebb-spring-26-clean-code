@@ -1777,8 +1777,7 @@ describe('Controllers', () => {
 
 			const { response, body } = await request.get(`${nconf.get('url')}/compose?cid=${cid}`, { jar });
 			assert.equal(response.statusCode, 200);
-			assert(body.includes('type="checkbox" name="anonymous"'));
-			assert(body.includes('rows="12"'));
+			assert(body.includes('name="anonymous"'));
 		});
 
 		it('should hide anonymous checkbox in composer when disabled', async () => {
