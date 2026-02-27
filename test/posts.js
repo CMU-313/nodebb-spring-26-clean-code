@@ -1306,6 +1306,7 @@ describe('Post\'s', () => {
 	describe('Anonymous posts', () => {
 		let adminUid;
 		let regularUid;
+		let otherUid;
 		let anonCid;
 		let anonTopicData;
 		let anonPost;
@@ -1315,6 +1316,7 @@ describe('Post\'s', () => {
 			adminUid = await user.create({ username: 'anon_admin' });
 			await groups.join('administrators', adminUid);
 			regularUid = await user.create({ username: 'anon_regular' });
+			otherUid = await user.create({ username: 'anon_other' });
 			({ cid: anonCid } = await categories.create({
 				name: 'Anon Test Category',
 				description: 'Category for anonymous post tests',
@@ -1484,6 +1486,105 @@ describe('Post\'s', () => {
 				assert(reply, 'anonymous reply should be in replies');
 				assert.strictEqual(reply.anonymous, 1);
 				assert.strictEqual(reply.user.uid, regularUid);
+			});
+		});
+
+		describe('Parent post anonymization', () => {
+			let childOfAnon;
+
+			before(async () => {
+				childOfAnon = await topics.reply({
+					uid: otherUid,
+					tid: anonTopicData.topicData.tid,
+					content: 'replying to anonymous post',
+					toPid: anonPost.pid,
+				});
+			});
+
+			it('should show anonymous user for parent of anonymous post to regular users', async () => {
+				const postObj = await posts.getPostData(childOfAnon.pid);
+				const postArray = [postObj];
+				await topics.addParentPosts(postArray, otherUid);
+				assert(postArray[0].parent, 'parent should exist');
+				assert.strictEqual(postArray[0].parent.user.username, 'Anonymous');
+				assert.strictEqual(postArray[0].parent.user.userslug, '');
+				assert.strictEqual(postArray[0].parent.uid, 0);
+			});
+
+			it('should show real user for parent of anonymous post to admins', async () => {
+				const postObj = await posts.getPostData(childOfAnon.pid);
+				const postArray = [postObj];
+				await topics.addParentPosts(postArray, adminUid);
+				assert(postArray[0].parent, 'parent should exist');
+				assert.strictEqual(postArray[0].parent.user.username, 'anon_regular');
+				assert.strictEqual(postArray[0].parent.uid, regularUid);
+			});
+		});
+
+		describe('Reply avatar preview anonymization', () => {
+			let parentForReplyTest;
+
+			before(async () => {
+				parentForReplyTest = await topics.reply({
+					uid: adminUid,
+					tid: anonTopicData.topicData.tid,
+					content: 'parent post for avatar preview test',
+				});
+				await topics.reply({
+					uid: regularUid,
+					tid: anonTopicData.topicData.tid,
+					content: 'anonymous reply for avatar preview',
+					anonymous: true,
+					toPid: parentForReplyTest.pid,
+				});
+			});
+
+			it('should show anonymous avatar in reply previews for regular users', async () => {
+				const topicData = await topics.getTopicData(anonTopicData.topicData.tid);
+				const postsData = await topics.getTopicPosts(topicData, `tid:${topicData.tid}:posts`, 0, 19, otherUid, false);
+				const parent = postsData.find(p => p.pid === parentForReplyTest.pid);
+				assert(parent, 'parent post should exist');
+				assert(parent.replies, 'replies data should exist');
+				assert(parent.replies.users.length > 0, 'should have reply users');
+				const hasAnonymous = parent.replies.users.some(u => u.username === 'Anonymous' && u.uid === 0);
+				assert(hasAnonymous, 'reply users should include anonymous placeholder');
+			});
+
+			it('should show real user avatar in reply previews for admins', async () => {
+				const topicData = await topics.getTopicData(anonTopicData.topicData.tid);
+				const postsData = await topics.getTopicPosts(topicData, `tid:${topicData.tid}:posts`, 0, 19, adminUid, false);
+				const parent = postsData.find(p => p.pid === parentForReplyTest.pid);
+				assert(parent, 'parent post should exist');
+				assert(parent.replies, 'replies data should exist');
+				assert(parent.replies.users.length > 0, 'should have reply users');
+				const hasRealUser = parent.replies.users.some(u => u.username === 'anon_regular');
+				assert(hasRealUser, 'reply users should include real user for admins');
+			});
+		});
+
+		describe('Profile history filtering', () => {
+			it('should exclude anonymous posts from other users profile history', async () => {
+				const pids = [anonPost.pid, normalPost.pid];
+				const summaries = await posts.getPostSummaryByPids(pids, otherUid, { stripTags: false });
+				const anonSummary = summaries.find(p => p.pid === anonPost.pid);
+				assert(anonSummary, 'anonymous post summary should be returned from getPostSummaryByPids');
+				assert.strictEqual(anonSummary.anonymous, 1, 'anonymous field should be 1');
+				assert.strictEqual(anonSummary.user.username, 'Anonymous', 'user should be masked for non-admin');
+			});
+
+			it('should include anonymous posts in own profile history', async () => {
+				const pids = [anonPost.pid];
+				const summaries = await posts.getPostSummaryByPids(pids, regularUid, { stripTags: false });
+				assert.strictEqual(summaries.length, 1);
+				assert.strictEqual(summaries[0].anonymous, 1);
+			});
+
+			it('should show real user data on anonymous posts for admins in summaries', async () => {
+				const pids = [anonPost.pid];
+				const summaries = await posts.getPostSummaryByPids(pids, adminUid, { stripTags: false });
+				assert.strictEqual(summaries.length, 1);
+				assert.strictEqual(summaries[0].anonymous, 1);
+				assert.strictEqual(summaries[0].user.username, 'anon_regular');
 			});
 		});
 	});
