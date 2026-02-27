@@ -44,3 +44,12 @@
 		</div>
 	</div>
 </div>
+
+{{{ if showAnonymousToggle }}}
+<div class="composer-anonymous-toggle form-check mt-1 ms-1">
+	<label class="form-check-label d-flex align-items-center gap-2">
+		<input class="form-check-input mt-0" type="checkbox" name="anonymous" />
+		<span>[[topic:composer.post-anonymously]]</span>
+	</label>
+</div>
+{{{ end }}}
