@@ -22,36 +22,37 @@ get:
       description: Likely unused — a URI-encoded JSON string containing values that are passed to `getCategoryTopics`.
       example: ''
     - in: query
-      name: 'after'
+      name: page
       schema:
-        type: string
+        type: number
       required: false
-      description: The index to start at when querying for the next set of topics. This parameter would be more aptly named `start`.
-      example: '0'
+      description: page of topics to return (if not passed in, falls back to `query` query parameter)
+      example: 1
     - in: query
-      name: 'sort'
+      name: sort
       schema:
         type: string
       required: false
-      description: Likely deprecated — the sorting method of topics (use `categoryTopicSort` instead.)
+      description: Sorting strategy to use (if not passed in, falls back to `query` query parameter)
       example: ''
     - in: query
-      name: 'categoryTopicSort'
+      name: direction
       schema:
-        type: string
+        type: number
+        enum: [-1, 1]
       required: false
-      description: The sorting method of topics
-      example: 'newest_to_oldest'
+      description: If passed in with a value of `-1`, the `page` is decremented by 1, and the `start` value is also subtracted by the number of items to return per page.
+      example: 1
     - in: query
-      name: 'direction'
+      name: tag
       schema:
         type: string
       required: false
-      description: The sorting of returned results (if you scroll up you want the topics reversed). Set to "-1" for reversed results.
-      example: '1'
+      description: Topic tag to filter by
+      example: ''
   responses:
     '200':
-      description: categories topics successfully retrieved
+      description: ''
       content:
         application/json:
           schema:
@@ -72,3 +73,18 @@ get:
                     type: object
                     additionalProperties:
                       description: A set of privileges with either true or false
+                  grouped:
+                    type: boolean
+                    description: Whether topics are being displayed in grouped/date-based view
+                  dateGroups:
+                    type: array
+                    description: Topics organized by date groups (Today, This Week, etc.)
+                    items:
+                      type: object
+                      properties:
+                        label:
+                          type: string
+                        topics:
+                          type: array
+                          items:
+                            $ref: ../../../components/schemas/TopicObject.yaml#/TopicObject

@@ -71,6 +71,9 @@ Settings:
     scrollToMyPost:
       type: boolean
       description: Automatically center the viewport to you new post after posting
+    categoryGroupedView:
+      type: boolean
+      description: Whether to display topics in date-based groups on category pages     
     notificationType_new-chat:
       type: string
       description: Notification type for new chat messages
