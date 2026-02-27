@@ -355,11 +355,13 @@ define('composer', [
 
 				const anonymousToggle = $(
 					'<div class="composer-anonymous-toggle form-check mt-1 ms-1">' +
-						'<input class="form-check-input" type="checkbox" name="anonymous" id="composer-anonymous-' + post_uuid + '"> ' +
-						'<label class="form-check-label" for="composer-anonymous-' + post_uuid + '">' + translated + '</label>' +
+						'<label class="form-check-label d-flex align-items-center gap-2">' +
+							'<input class="form-check-input mt-0" type="checkbox" name="anonymous">' +
+							'<span>' + translated + '</span>' +
+						'</label>' +
 					'</div>'
 				);
-				postContainer.find('.title-container').after(anonymousToggle);
+				postContainer.find('.write-container .write').after(anonymousToggle);
 			});
 		}
 

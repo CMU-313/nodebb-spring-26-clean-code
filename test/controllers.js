@@ -1785,13 +1785,15 @@ describe('Controllers', () => {
 			assert.equal(body.url, `${nconf.get('relative_path')}/compose`);
 		});
 
-		it('should render anonymous checkbox in composer when enabled', async () => {
+		it('should render anonymous checkbox below a growing textarea in composer when enabled', async () => {
 			oldAllowAnonymousPosts = meta.config.allowAnonymousPosts;
 			await meta.configs.set('allowAnonymousPosts', 1);
 
 			const { response, body } = await request.get(`${nconf.get('url')}/compose?cid=${cid}`, { jar });
 			assert.equal(response.statusCode, 200);
+			assert(body.includes('class="write shadow-none rounded-1 w-100 form-control flex-grow-1"'));
 			assert(body.includes('type="checkbox" name="anonymous"'));
+			assert(body.indexOf('textarea class="write') < body.indexOf('name="anonymous"'));
 			assert(body.includes('rows="12"'));
 			assert(body.includes('style="min-height: 14rem;"'));
 		});
