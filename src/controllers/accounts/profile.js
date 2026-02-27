@@ -117,7 +117,7 @@ async function getPosts(callerUid, userData, setSuffix) {
 			const isSelf = parseInt(callerUid, 10) === parseInt(userData.uid, 10);
 			postData.push(...p.filter(
 				p => p && p.topic &&
-					(p.anonymous !== 1 || isSelf || isAdmin) &&
+					(parseInt(p.anonymous, 10) !== 1 || isSelf || isAdmin) &&
 					(
 						isAdmin ||
 						isModOfCid[p.topic.cid] ||

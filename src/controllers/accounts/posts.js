@@ -241,6 +241,14 @@ async function getPostsFromUserSet(template, req, res) {
 	}
 	const { itemCount, itemData } = result;
 
+	if (data.type === 'posts' && itemData.posts) {
+		const isAdmin = await user.isAdministrator(req.uid);
+		const isSelf = parseInt(req.uid, 10) === parseInt(uid, 10);
+		if (!isAdmin && !isSelf) {
+			itemData.posts = itemData.posts.filter(p => parseInt(p.anonymous, 10) !== 1);
+		}
+	}
+
 	payload[data.type] = itemData[data.type];
 	payload.nextStart = itemData.nextStart;
 
