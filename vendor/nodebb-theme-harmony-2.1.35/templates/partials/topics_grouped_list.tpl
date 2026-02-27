@@ -64,13 +64,6 @@
                             <span class="text-xs text-muted">[[global:views]]</span>
                         </div>
                     </div>
-                    {{{ if ../endorsed }}}
-                    <div class="d-flex align-items-center">
-                        <span class="badge bg-success text-white" title="Endorsed by TA/Instructor">
-                            <i class="fa fa-fw fa-certificate"></i> Endorsed
-                        </span>
-                    </div>
-                    {{{ end }}}
                     <div component="topic/teaser" class="meta teaser flex-grow-1 min-width-0 {{{ if !config.theme.mobileTopicTeasers }}}d-none d-lg-block{{{ end }}}">
                         <div class="lastpost border-start border-2 lh-sm h-100 d-flex flex-column gap-1 ps-2" style="border-color: {../category.bgColor}!important;">
                             {{{ if ../unreplied }}}
@@ -92,6 +85,12 @@
                         </div>
                     </div>
                 </div>
+                {{{ if ../endorsed }}}
+                <div component="category/topic/endorsed-decor">
+                    <div class="triangle"></div>
+                    <i class="fa fa-solid fa-award"></i>
+                </div>
+                {{{ end }}}
             </li>
             {{{ end }}}
         </ul>
