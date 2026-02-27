@@ -52,7 +52,7 @@ module.exports = function (Posts) {
 			if (_activitypub && _activitypub.tag && Array.isArray(_activitypub.tag)) {
 				_activitypub.tag
 					.filter(tag => tag.type === 'Emoji' &&
-								tag.icon && tag.icon.type === 'Image')
+						tag.icon && tag.icon.type === 'Image')
 					.forEach((tag) => {
 						if (!tag.name.startsWith(':')) {
 							tag.name = `:${tag.name}`;
@@ -74,7 +74,6 @@ module.exports = function (Posts) {
 
 		const topicData = await topics.getTopicFields(tid, ['cid', 'pinned']);
 		postData.cid = topicData.cid;
-
 		await Promise.all([
 			db.sortedSetAdd('posts:pid', timestamp, postData.pid),
 			utils.isNumber(pid) ? db.incrObjectField('global', 'postCount') : null,

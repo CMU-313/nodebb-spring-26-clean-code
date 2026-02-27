@@ -95,6 +95,8 @@ PostObject:
     topic:
       type: object
       properties:
+        type:
+          type: string
         uid:
           type: number
           description: A user identifier
@@ -413,6 +415,8 @@ PostDataObject:
         display_move_tools:
           type: boolean
         display_post_menu:
+          type: boolean
+        display_mark_as_answer:
           type: boolean
         flagId:
           type: number
