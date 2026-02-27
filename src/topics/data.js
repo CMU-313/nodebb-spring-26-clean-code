@@ -148,4 +148,7 @@ function modifyTopic(topic, fields) {
 			topic.thumbs = [];
 		}
 	}
+	if (!topic.type) {
+		topic.type = 'question';
+	}
 }

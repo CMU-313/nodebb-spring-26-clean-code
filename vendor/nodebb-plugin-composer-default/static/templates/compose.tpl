@@ -13,7 +13,6 @@
 			{{{ end }}}
 			<input type="hidden" name="_csrf" value="{config.csrf_token}" />
 		</form>
-
 		<!-- IMPORT partials/composer-title-container.tpl -->
 
 		<!-- IMPORT partials/composer-formatting.tpl -->
