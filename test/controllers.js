@@ -1717,7 +1717,7 @@ describe('Controllers', () => {
 		});
 
 		const anonymousCheckboxRegex = /<input[^>]*id="allowAnonymousPosts"[^>]*>/;
-		const anonymousCheckboxCheckedRegex = /<input[^>]*id="allowAnonymousPosts"[^>]*\schecked(?:\s|>|=)/;
+		const anonymousCheckboxCheckedRegex = /<input(?=[^>]*id="allowAnonymousPosts")(?=[^>]*\bchecked\b)[^>]*>/;
 
 		it('should reflect allowAnonymousPosts=true in admin post settings checkbox', async () => {
 			await meta.configs.set('allowAnonymousPosts', 1);
