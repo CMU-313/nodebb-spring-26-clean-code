@@ -47,6 +47,7 @@ In `test/user.js`, I wrote the test 'should force instructor group onto groupTit
 ### All posts are either questions or notes
 
 Like Piazza, students can now only post either questions or notes. (Clicking submit will create a question, while clicking Create New Note will, well, create a new note.)
+
 ![alt text](readme-images/create-new-topic.png)
 
 to resolve a question, the original poster can open the dropdown menu on any post and click "Mark as answer". Only the original poster will see this option on the frontend.
