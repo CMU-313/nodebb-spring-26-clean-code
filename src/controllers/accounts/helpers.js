@@ -279,6 +279,16 @@ async function getCounts(userData, callerUID) {
 	}
 	const counts = await utils.promiseParallel(promises);
 	counts.posts = isRemote ? userData.postcount : counts.posts;
+	if (!userData.isAdmin && !userData.isSelf && counts.posts > 0) {
+		const pidSets = cids.map(c => `cid:${c}:uid:${uid}:pids`);
+		const pidsPerSet = await db.getSortedSetsMembers(pidSets);
+		const allPids = pidsPerSet.flat();
+		if (allPids.length) {
+			const postData = await posts.getPostsFields(allPids, ['anonymous']);
+			const anonCount = postData.filter(p => p && parseInt(p.anonymous, 10) === 1).length;
+			counts.posts -= anonCount;
+		}
+	}
 	counts.categoriesWatched = counts.categoriesWatched && counts.categoriesWatched.length;
 	counts.groups = userData.groups.length;
 	counts.following = userData.followingCount;

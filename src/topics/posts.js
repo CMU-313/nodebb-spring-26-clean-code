@@ -195,9 +195,12 @@ module.exports = function (Topics) {
 		const pidToPrivs = _.zipObject(parentPids, postPrivileges);
 
 		parentPids = parentPids.filter(p => pidToPrivs[p]['topics:read']);
-		const parentPosts = await posts.getPostsFields(parentPids, ['uid', 'pid', 'timestamp', 'content', 'sourceContent', 'deleted']);
+		const parentPosts = await posts.getPostsFields(parentPids, ['uid', 'pid', 'timestamp', 'content', 'sourceContent', 'deleted', 'anonymous']);
 		const parentUids = _.uniq(parentPosts.map(postObj => postObj && postObj.uid));
-		const userData = await user.getUsersFields(parentUids, ['username', 'userslug', 'picture']);
+		const [userData, isAdmin] = await Promise.all([
+			user.getUsersFields(parentUids, ['username', 'userslug', 'picture']),
+			user.isAdministrator(callerUid),
+		]);
 
 		const usersMap = _.zipObject(parentUids, userData);
 
@@ -217,15 +220,28 @@ module.exports = function (Topics) {
 
 		const parents = {};
 		parentPosts.forEach((post, i) => {
-			if (usersMap[post.uid]) {
-				parents[parentPids[i]] = {
-					uid: post.uid,
-					pid: post.pid,
-					content: post.content,
-					user: usersMap[post.uid],
-					timestamp: post.timestamp,
-					timestampISO: post.timestampISO,
+			const parentData = {
+				uid: post.uid,
+				pid: post.pid,
+				content: post.content,
+				user: usersMap[post.uid] ? { ...usersMap[post.uid] } : null,
+				timestamp: post.timestamp,
+				timestampISO: post.timestampISO,
+			};
+			if (post.anonymous === 1 && !isAdmin) {
+				parentData.uid = 0;
+				parentData.user = {
+					uid: 0,
+					username: 'Anonymous',
+					displayname: 'Anonymous',
+					userslug: '',
+					picture: '',
+					'icon:text': '?',
+					'icon:bgColor': '#aaa',
 				};
+			}
+			if (parentData.user) {
+				parents[parentPids[i]] = parentData;
 			}
 		});
 
@@ -369,7 +385,7 @@ module.exports = function (Topics) {
 
 		const uniquePids = _.uniq(_.flatten(arrayOfReplyPids));
 
-		let replyData = await posts.getPostsFields(uniquePids, ['pid', 'uid', 'timestamp']);
+		let replyData = await posts.getPostsFields(uniquePids, ['pid', 'uid', 'timestamp', 'anonymous']);
 		const result = await plugins.hooks.fire('filter:topics.getPostReplies', {
 			uid: callerUid,
 			replies: replyData,
@@ -380,7 +396,20 @@ module.exports = function (Topics) {
 
 		const uniqueUids = _.uniq(uids);
 
-		const userData = await user.getUsersWithFields(uniqueUids, ['uid', 'username', 'userslug', 'picture'], callerUid);
+		const [userData, isAdmin] = await Promise.all([
+			user.getUsersWithFields(uniqueUids, ['uid', 'username', 'userslug', 'picture'], callerUid),
+			user.isAdministrator(callerUid),
+		]);
+
+		const anonymousUser = {
+			uid: 0,
+			username: 'Anonymous',
+			displayname: 'Anonymous',
+			userslug: '',
+			picture: '',
+			'icon:text': '?',
+			'icon:bgColor': '#aaa',
+		};
 
 		const uidMap = _.zipObject(uniqueUids, userData);
 		const pidMap = _.zipObject(replyData.map(r => r.pid), replyData);
@@ -403,7 +432,12 @@ module.exports = function (Topics) {
 
 			replyPids.forEach((replyPid) => {
 				const replyData = pidMap[replyPid];
-				if (!uidsUsed[replyData.uid] && currentData.users.length < 6) {
+				if (replyData.anonymous === 1 && !isAdmin) {
+					if (!uidsUsed.anonymous && currentData.users.length < 6) {
+						currentData.users.push(anonymousUser);
+						uidsUsed.anonymous = true;
+					}
+				} else if (!uidsUsed[replyData.uid] && currentData.users.length < 6) {
 					currentData.users.push(uidMap[replyData.uid]);
 					uidsUsed[replyData.uid] = true;
 				}

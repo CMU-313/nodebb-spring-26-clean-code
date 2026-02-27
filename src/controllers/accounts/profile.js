@@ -114,13 +114,16 @@ async function getPosts(callerUid, userData, setSuffix) {
 				pids,
 			}));
 			const p = await posts.getPostSummaryByPids(pids, callerUid, { stripTags: false });
+			const isSelf = parseInt(callerUid, 10) === parseInt(userData.uid, 10);
 			postData.push(...p.filter(
-				p => p && p.topic && (
-					isAdmin ||
-					isModOfCid[p.topic.cid] ||
-					(p.topic.scheduled && cidToCanSchedule[p.topic.cid]) ||
-					(!p.deleted && !p.topic.deleted)
-				)
+				p => p && p.topic &&
+					(parseInt(p.anonymous, 10) !== 1 || isSelf || isAdmin) &&
+					(
+						isAdmin ||
+						isModOfCid[p.topic.cid] ||
+						(p.topic.scheduled && cidToCanSchedule[p.topic.cid]) ||
+						(!p.deleted && !p.topic.deleted)
+					)
 			));
 		}
 		start += count;
