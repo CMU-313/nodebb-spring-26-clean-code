@@ -1,3 +1,4 @@
+/* eslint-disable @stylistic/js/indent */
 'use strict';
 
 define('forum/category', [
@@ -42,6 +43,11 @@ define('forum/category', [
 
 		handleDescription();
 
+		// Initialize date group collapse/expand if grouped view is active
+		if (ajaxify.data.grouped) {
+			initDateGroupCollapse();
+		}
+
 		categorySelector.init($('[component="category-selector"]'), {
 			privilege: 'find',
 			parentCid: ajaxify.data.cid,
@@ -55,6 +61,32 @@ define('forum/category', [
 		hooks.fire('action:topics.loaded', { topics: ajaxify.data.topics });
 		hooks.fire('action:category.loaded', { cid: ajaxify.data.cid });
 	};
+
+    function initDateGroupCollapse() {
+        $('[component="category/date-group"]').each(function () {
+            const $group = $(this);
+            const $header = $group.find('[component="category/date-group/header"]');
+            const $chevron = $header.find('.date-group-chevron');
+            const $body = $group.find('.date-group-body');
+
+            $header.on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                var isVisible = $body.is(':visible');
+
+                if (isVisible) {
+                    $body.slideUp(200);
+                    $chevron.removeClass('fa-chevron-down').addClass('fa-chevron-right');
+                    $header.attr('aria-expanded', 'false');
+                } else {
+                    $body.slideDown(200);
+                    $chevron.removeClass('fa-chevron-right').addClass('fa-chevron-down');
+                    $header.attr('aria-expanded', 'true');
+                }
+            });
+        });
+    }
 
 	function handleScrollToTopicIndex() {
 		let topicIndex = ajaxify.data.topicIndex;
