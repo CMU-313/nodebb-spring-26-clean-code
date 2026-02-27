@@ -103,6 +103,10 @@ define('composer', [
 		composer.bsEnvironment = env;
 	}
 
+	function anonymousPostingEnabled() {
+		return [1, '1', true, 'true', 'on'].includes(config.allowAnonymousPosts);
+	}
+
 	function alreadyOpen(post) {
 		// If a composer for the same cid/tid/pid is already open, return the uuid, else return bool false
 		var type;
@@ -343,6 +347,22 @@ define('composer', [
 		tags.init(postContainer, composer.posts[post_uuid]);
 		autocomplete.init(postContainer, post_uuid);
 
+		if (anonymousPostingEnabled() && !postContainer.find('input[name="anonymous"]').length) {
+			translator.translate('[[topic:composer.post-anonymously]]', function (translated) {
+				if (postContainer.find('input[name="anonymous"]').length) {
+					return;
+				}
+
+				const anonymousToggle = $(
+					'<div class="composer-anonymous-toggle form-check mt-1 ms-1">' +
+						'<input class="form-check-input" type="checkbox" name="anonymous" id="composer-anonymous-' + post_uuid + '"> ' +
+						'<label class="form-check-label" for="composer-anonymous-' + post_uuid + '">' + translated + '</label>' +
+					'</div>'
+				);
+				postContainer.find('.title-container').after(anonymousToggle);
+			});
+		}
+
 		postContainer.on('change', 'input, textarea', function () {
 			composer.posts[post_uuid].modified = true;
 		});
@@ -475,6 +495,7 @@ define('composer', [
 			canUploadFile: app.user.privileges['upload:post:file'] && (config.maximumFileSize > 0 || app.user.isAdmin),
 			showHandleInput: config.allowGuestHandles &&
 				(app.user.uid === 0 || (isEditing && isGuestPost && app.user.isAdmin)),
+			showAnonymousToggle: anonymousPostingEnabled(),
 			handle: postData ? postData.handle || '' : undefined,
 			formatting: composer.formatting,
 			tagWhitelist: postData.category ? postData.category.tagWhitelist : ajaxify.data.tagWhitelist,
@@ -665,6 +686,7 @@ define('composer', [
 		var titleEl = postContainer.find('.title');
 		var bodyEl = postContainer.find('textarea');
 		var thumbEl = postContainer.find('input#topic-thumb-url');
+		var anonymousEl = postContainer.find('input[name="anonymous"]');
 		var onComposeRoute = postData.hasOwnProperty('template') && postData.template.compose === true;
 		const submitBtn = postContainer.find('.composer-submit');
 
@@ -733,6 +755,7 @@ define('composer', [
 				tags: tags.getTags(post_uuid),
 				thumbs: postData.thumbs || [],
 				timestamp: scheduler.getTimestamp(),
+				anonymous: anonymousEl.length ? anonymousEl.prop('checked') : false,
 			};
 		} else if (action === 'posts.reply') {
 			route = `/topics/${postData.tid}`;
@@ -742,6 +765,7 @@ define('composer', [
 				handle: handleEl ? handleEl.val() : undefined,
 				content: bodyEl.val(),
 				toPid: postData.toPid,
+				anonymous: anonymousEl.length ? anonymousEl.prop('checked') : false,
 			};
 		} else if (action === 'posts.edit') {
 			method = 'put';
