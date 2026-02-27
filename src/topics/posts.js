@@ -164,7 +164,7 @@ module.exports = function (Topics) {
 		topicData.posts.forEach((post) => {
 			if (post) {
 				// Anonymize posts with anonymous flag for non-admin viewers
-				posts.anonymizePost(post, topicPrivileges.isAdmin || post.selfPost);
+				posts.anonymizePost(post, topicPrivileges.isAdmin);
 				post.topicOwnerPost = parseInt(topicData.uid, 10) === parseInt(post.uid, 10);
 				post.display_edit_tools = topicPrivileges.isAdminOrMod || (post.selfPost && topicPrivileges['posts:edit']);
 				post.display_mark_as_answer = topicData.posts[0].selfPost && topicData.type === 'question'; // only original poster can set answer
