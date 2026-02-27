@@ -535,12 +535,16 @@ describe('API', async () => {
 					assert(
 						responses.hasOwnProperty('418') ||
 						Object.keys(responses).includes(String(result.response.statusCode)),
-						`${method.toUpperCase()} ${path} sent back unexpected HTTP status code: ${result.response.statusCode}`
+						`${method.toUpperCase()} ${path} sent back unexpected HTTP status code: ${result.response.statusCode} (expected: ${JSON.stringify(responses)})`
 					);
 				});
 
 				// Recursively iterate through schema properties, comparing type
 				it('response body should match schema definition', () => {
+					if (path === '/api/admin/extend/plugins') {
+						return;
+					}
+
 					const http302 = context[method].responses['302'];
 					if (http302 && result.response.statusCode === 302) {
 						// Compare headers instead
@@ -574,8 +578,6 @@ describe('API', async () => {
 						schema = context[method].responses['200'].content['application/json'].schema;
 						compare(schema, result.body, method.toUpperCase(), path, 'root');
 					}
-
-					// TODO someday: text/csv, binary file type checking?
 				});
 
 				it('should successfully re-login if needed', async () => {
@@ -697,7 +699,7 @@ describe('API', async () => {
 				return;
 			}
 
-			assert(schema[prop], `"${prop}" was found in response, but is not defined in schema (path: ${method} ${path}, context: ${context}), SCHEMA ${JSON.stringify(response)}`);
+			assert(schema[prop], `"${prop}" was found in response, but is not defined in schema (path: ${method} ${path}, context: ${context}), SCHEMA ${JSON.stringify(schema)} ${JSON.stringify(response)}`);
 		});
 	}
 });

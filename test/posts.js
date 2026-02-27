@@ -52,7 +52,7 @@ describe('Post\'s', () => {
 	});
 
 	it('should update category teaser properly', async () => {
-		const getCategoriesAsync = async () => (await request.get(`${nconf.get('url')}/api/categories`, { })).body;
+		const getCategoriesAsync = async () => (await request.get(`${nconf.get('url')}/api/categories`, {})).body;
 		const postResult = await topics.post({ uid: globalModUid, cid: cid, title: 'topic title', content: '123456789' });
 
 		let data = await getCategoriesAsync();
@@ -160,6 +160,49 @@ describe('Post\'s', () => {
 			const data = await posts.hasVoted(postData.pid, voterUid);
 			assert.equal(data.upvoted, true);
 			assert.equal(data.downvoted, false);
+		});
+		it('voting as normal user should have post be returned as not endorsed', async () => {
+			const result = await apiPosts.upvote({ uid: voterUid }, { pid: postData.pid, room_id: 'topic_1' });
+			const newPostData = await posts.getPostData(result.post.pid);
+
+			assert.equal(result.post.upvotes, 1);
+			assert.equal(result.post.downvotes, 0);
+			assert.equal(result.post.votes, 1);
+			assert.equal(result.user.reputation, 1);
+			assert.deepEqual(result.post.endorsedVotes, []);
+			assert.deepEqual(newPostData.endorsedVotes, []);
+			await apiPosts.unvote({ uid: voterUid }, { pid: postData.pid, room_id: 'topic_1' }); // cleanup
+		});
+		it('voting as ta should have post be returned as endorsed', async () => {
+			await groups.create({ name: 'ta' });
+			await groups.join('ta', voterUid);
+			const result = await apiPosts.upvote({ uid: voterUid }, { pid: postData.pid, room_id: 'topic_1' });
+			const newPostData = await posts.getPostData(result.post.pid);
+			assert.equal(result.post.upvotes, 1);
+			assert.equal(result.post.downvotes, 0);
+			assert.equal(result.post.votes, 1);
+			assert.equal(result.user.reputation, 1);
+			assert.deepEqual(result.post.endorsedVotes, [
+				{
+					username: 'upvoter',
+					uid: 1,
+					fullname: undefined,
+					displayname: 'upvoter',
+					isLocal: true,
+				},
+			]
+			);
+			assert.deepEqual(newPostData.endorsedVotes, [
+				{
+					username: 'upvoter',
+					uid: 1,
+					fullname: undefined,
+					displayname: 'upvoter',
+					isLocal: true,
+				},
+			]
+			);
+
 		});
 
 		it('should add the pid to the :votes sorted set for that user', async () => {
@@ -1048,7 +1091,7 @@ describe('Post\'s', () => {
 			const oldValue = meta.config.groupsExemptFromPostQueue;
 			meta.config.groupsExemptFromPostQueue = ['registered-users'];
 			const uid = await user.create({ username: 'mergeexemptuser' });
-			const result = await apiTopics.create({ uid: uid, emit: () => {} }, { title: 'should not be queued', content: 'topic content', cid: cid });
+			const result = await apiTopics.create({ uid: uid, emit: () => { } }, { title: 'should not be queued', content: 'topic content', cid: cid });
 			assert.strictEqual(result.title, 'should not be queued');
 			meta.config.groupsExemptFromPostQueue = oldValue;
 		});
@@ -1256,6 +1299,191 @@ describe('Post\'s', () => {
 				const events = await topics.events.get(tid1, 1);
 				assert(events);
 				assert.strictEqual(events.length, 0);
+			});
+		});
+	});
+
+	describe('Anonymous posts', () => {
+		let adminUid;
+		let regularUid;
+		let anonCid;
+		let anonTopicData;
+		let anonPost;
+		let normalPost;
+
+		before(async () => {
+			adminUid = await user.create({ username: 'anon_admin' });
+			await groups.join('administrators', adminUid);
+			regularUid = await user.create({ username: 'anon_regular' });
+			({ cid: anonCid } = await categories.create({
+				name: 'Anon Test Category',
+				description: 'Category for anonymous post tests',
+			}));
+			anonTopicData = await topics.post({
+				uid: regularUid,
+				cid: anonCid,
+				title: 'Anonymous Test Topic',
+				content: 'Topic for anonymous post tests',
+			});
+			anonPost = await topics.reply({
+				uid: regularUid,
+				tid: anonTopicData.topicData.tid,
+				content: 'anon reply',
+				anonymous: true,
+			});
+			normalPost = await topics.reply({
+				uid: regularUid,
+				tid: anonTopicData.topicData.tid,
+				content: 'normal reply',
+				anonymous: false,
+			});
+		});
+
+		describe('Anonymous flag storage', () => {
+			it('should store anonymous flag as 1 when anonymous is true', async () => {
+				const value = await posts.getPostField(anonPost.pid, 'anonymous');
+				assert.strictEqual(value, 1);
+			});
+
+			it('should store anonymous flag as 0 when anonymous is falsy', async () => {
+				const value = await posts.getPostField(normalPost.pid, 'anonymous');
+				assert.strictEqual(value, 0);
+			});
+		});
+
+		describe('API masking for regular users', () => {
+			it('should mask poster identity for regular users on anonymous posts', async () => {
+				const post = await apiPosts.get({ uid: regularUid }, { pid: anonPost.pid });
+				assert.strictEqual(post.uid, 0);
+				assert.strictEqual(post.user.username, 'Anonymous');
+				assert.strictEqual(post.user.displayname, 'Anonymous');
+				assert.strictEqual(post.user['icon:text'], '?');
+			});
+
+		});
+
+		describe('Admin visibility', () => {
+			it('should expose real user data and preserve anonymous flag for admins', async () => {
+				const post = await apiPosts.get({ uid: adminUid }, { pid: anonPost.pid });
+				assert.strictEqual(post.anonymous, 1);
+				assert.strictEqual(post.uid, regularUid);
+			});
+		});
+
+		describe('Regression for non-anonymous posts', () => {
+			it('should not mask poster on non-anonymous posts for regular users', async () => {
+				const post = await apiPosts.get({ uid: regularUid }, { pid: normalPost.pid });
+				assert.strictEqual(post.uid, regularUid);
+				assert.strictEqual(post.isAnonymous, undefined);
+				assert(!post.user || post.user.uid !== 0, 'non-anonymous post should not have masked user');
+			});
+		});
+
+		describe('Topic-level masking (modifyPostsByPrivilege)', () => {
+			it('should mask anonymous posts in topic view for regular users', () => {
+				const mockTopicData = {
+					uid: regularUid,
+					locked: false,
+					postSharing: [],
+					posts: [
+						{
+							anonymous: 1,
+							uid: regularUid,
+							user: { uid: regularUid, username: 'anon_regular', displayname: 'anon_regular' },
+							editor: { uid: regularUid },
+							selfPost: true,
+							deleted: false,
+							index: 1,
+						},
+						{
+							anonymous: 0,
+							uid: regularUid,
+							user: { uid: regularUid, username: 'anon_regular', displayname: 'anon_regular' },
+							editor: null,
+							selfPost: true,
+							deleted: false,
+							index: 2,
+						},
+					],
+				};
+				topics.modifyPostsByPrivilege(mockTopicData, {
+					uid: regularUid,
+					isAdmin: false,
+					isAdminOrMod: false,
+					'posts:edit': false,
+					'posts:delete': false,
+				});
+				const anonPostResult = mockTopicData.posts[0];
+				assert.strictEqual(anonPostResult.user.username, 'Anonymous');
+				assert.strictEqual(anonPostResult.editor, null);
+				assert.strictEqual(anonPostResult.selfPost, false);
+			});
+
+			it('should preserve real user data on anonymous posts in topic view for admins', () => {
+				const originalUser = { uid: regularUid, username: 'anon_regular', displayname: 'anon_regular' };
+				const mockTopicData = {
+					uid: regularUid,
+					locked: false,
+					postSharing: [],
+					posts: [
+						{
+							anonymous: 1,
+							uid: regularUid,
+							user: { ...originalUser },
+							editor: null,
+							selfPost: false,
+							deleted: false,
+							index: 1,
+						},
+					],
+				};
+				topics.modifyPostsByPrivilege(mockTopicData, {
+					uid: adminUid,
+					isAdmin: true,
+					isAdminOrMod: true,
+					'posts:edit': true,
+					'posts:delete': true,
+				});
+				const anonPostResult = mockTopicData.posts[0];
+				assert.strictEqual(anonPostResult.anonymous, 1);
+				assert.strictEqual(anonPostResult.user.uid, regularUid);
+				assert.strictEqual(anonPostResult.user.username, 'anon_regular');
+			});
+		});
+
+		describe('Replies endpoint masking', () => {
+			let parentPost;
+			let anonReply;
+
+			before(async () => {
+				parentPost = await topics.reply({
+					uid: adminUid,
+					tid: anonTopicData.topicData.tid,
+					content: 'parent post for reply test',
+				});
+				anonReply = await topics.reply({
+					uid: regularUid,
+					tid: anonTopicData.topicData.tid,
+					content: 'anonymous reply to parent',
+					anonymous: true,
+					toPid: parentPost.pid,
+				});
+			});
+
+			it('should mask anonymous replies for regular users via getReplies', async () => {
+				const replies = await apiPosts.getReplies({ uid: regularUid }, { pid: parentPost.pid });
+				const reply = replies.find(r => r.pid === anonReply.pid);
+				assert(reply, 'anonymous reply should be in replies');
+				assert.strictEqual(reply.user.username, 'Anonymous');
+				assert.strictEqual(reply.user.uid, 0);
+			});
+
+			it('should expose real user data on anonymous replies for admins via getReplies', async () => {
+				const replies = await apiPosts.getReplies({ uid: adminUid }, { pid: parentPost.pid });
+				const reply = replies.find(r => r.pid === anonReply.pid);
+				assert(reply, 'anonymous reply should be in replies');
+				assert.strictEqual(reply.anonymous, 1);
+				assert.strictEqual(reply.user.uid, regularUid);
 			});
 		});
 	});

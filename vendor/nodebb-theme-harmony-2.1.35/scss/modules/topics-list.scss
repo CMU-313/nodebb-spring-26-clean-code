@@ -1,40 +1,74 @@
-ul.topics-list, ul.categories-list {
-	li {
-		&.deleted {
-			.meta, .topic-thumbs { visibility: hidden!important; }
-			opacity: 0.65;
-		}
+ul.topics-list,
+ul.categories-list {
+  li {
+    &.deleted {
+      .meta,
+      .topic-thumbs {
+        visibility: hidden !important;
+      }
+      opacity: 0.65;
+    }
 
-		&.selected {
-			background-color: mix($body-bg, $body-color, 90%);
-			[component="topic/select"] {
-				color: $success!important;
-				visibility: visible;
-			}
-		}
-		p {
-			margin: 0 !important;
-		}
+    &.selected {
+      background-color: mix($body-bg, $body-color, 90%);
+      [component="topic/select"] {
+        color: $success !important;
+        visibility: visible;
+      }
+    }
+    p {
+      margin: 0 !important;
+    }
 
-		// all other skins use link-color for unread titles
-		&.unread .title {
-			color: $link-color!important;
-		}
+    // all other skins use link-color for unread titles
+    &.unread .title {
+      color: $link-color !important;
+    }
 
-		.ui-sortable-handle {
-			cursor: move;
-		}
+    .ui-sortable-handle {
+      cursor: move;
+    }
 
-		// if only one thumb don't display
-		[data-numthumbs="1"] { display: none; }
-	}
+    // if only one thumb don't display
+    [data-numthumbs="1"] {
+      display: none;
+    }
+  }
+}
+[component="category/topic"] {
+  position: relative;
+}
+[component="category/topic/endorsed-decor"] {
+  .triangle {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    transform: translate(50%, 50%) rotate(45deg);
+    background-color: hsl(110, 90, 40);
+  }
+  position: absolute;
+
+  right: 0;
+  bottom: 0;
+  height: 90px;
+  width: 90px;
+  overflow: hidden;
+
+  i {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    color: white;
+    font-size: 20px;
+  }
 }
 
 // on default skin use primary color for unread titles
 .skin-noskin {
-	ul.topics-list, ul.categories-list {
-		li.unread .title {
-			color: $primary!important;
-		}
-	}
+  ul.topics-list,
+  ul.categories-list {
+    li.unread .title {
+      color: $primary !important;
+    }
+  }
 }

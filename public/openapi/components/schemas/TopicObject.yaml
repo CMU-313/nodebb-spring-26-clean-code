@@ -1,6 +1,6 @@
 TopicObject:
   allOf:
-    - $ref: '#/TopicObjectSlim'
+    - $ref: "#/TopicObjectSlim"
     - type: object
       properties:
         lastposttime:
@@ -48,7 +48,8 @@ TopicObject:
               type: string
             userslug:
               type: string
-              description: An URL-safe variant of the username (i.e. lower-cased, spaces
+              description:
+                An URL-safe variant of the username (i.e. lower-cased, spaces
                 removed, etc.)
             reputation:
               type: number
@@ -66,12 +67,14 @@ TopicObject:
               type: string
             icon:text:
               type: string
-              description: A single-letter representation of a username. This is used in the
+              description:
+                A single-letter representation of a username. This is used in the
                 auto-generated icon given to users without
                 an avatar
             icon:bgColor:
               type: string
-              description: A six-character hexadecimal colour code assigned to the user. This
+              description:
+                A six-character hexadecimal colour code assigned to the user. This
                 value is used in conjunction with
                 `icon:text` for the user's auto-generated
                 icon
@@ -109,6 +112,19 @@ TopicObject:
             sourceContent:
               type: string
               nullable: true
+            endorsedVotes:
+              type: array
+              items:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  uid:
+                    type: number
+                  displayname:
+                    type: string
+                  isLocal:
+                    type: boolean
             timestampISO:
               type: string
               description: An ISO 8601 formatted date string (complementing `timestamp`)
@@ -127,19 +143,22 @@ TopicObject:
                   type: boolean
                 userslug:
                   type: string
-                  description: An URL-safe variant of the username (i.e. lower-cased, spaces
+                  description:
+                    An URL-safe variant of the username (i.e. lower-cased, spaces
                     removed, etc.)
                 picture:
                   nullable: true
                   type: string
                 icon:text:
                   type: string
-                  description: A single-letter representation of a username. This is used in the
+                  description:
+                    A single-letter representation of a username. This is used in the
                     auto-generated icon given to users
                     without an avatar
                 icon:bgColor:
                   type: string
-                  description: A six-character hexadecimal colour code assigned to the user. This
+                  description:
+                    A six-character hexadecimal colour code assigned to the user. This
                     value is used in conjunction with
                     `icon:text` for the user's
                     auto-generated icon
@@ -196,6 +215,8 @@ TopicObject:
           description: "`pinExpiry` rendered as an ISO 8601 format"
         index:
           type: number
+        endorsed:
+          type: boolean
       required:
         - tid
 TopicObjectSlim:
@@ -239,7 +260,8 @@ TopicObjectSlim:
           type: number
         pinned:
           type: number
-          description: Whether or not this particular topic is pinned to the top of the
+          description:
+            Whether or not this particular topic is pinned to the top of the
             category
         timestamp:
           type: number
@@ -285,9 +307,12 @@ TopicObjectSlim:
               url:
                 type: string
                 description: Relative path to the topic thumbnail
+
     - type: object
       description: Optional properties that may or may not be present (except for `tid`, which is always present, and is only here as a hack to pass validation)
       properties:
+        endorsed:
+          type: boolean
         tid:
           type: number
           description: A topic identifier

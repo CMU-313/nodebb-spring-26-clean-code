@@ -3,12 +3,13 @@
 const db = require('../database');
 const plugins = require('../plugins');
 const utils = require('../utils');
-
 const intFields = [
 	'uid', 'pid', 'tid', 'deleted', 'timestamp',
 	'upvotes', 'downvotes', 'deleterUid', 'edited',
 	'replies', 'bookmarks', 'announces', 'anonymous',
 ];
+const groups = require('../groups');
+const user = require('../user');
 
 module.exports = function (Posts) {
 	Posts.getPostsFields = async function (pids, fields) {
@@ -22,12 +23,20 @@ module.exports = function (Posts) {
 			posts: postData,
 			fields: fields,
 		});
+
+		const endorsedVotes = await Posts.getEndorsedUsers(pids);
+
 		result.posts.forEach(post => modifyPost(post, fields));
+		result.posts.forEach((post, i) => {
+			if (post === undefined || post === null) return;
+			post.endorsedVotes = endorsedVotes[i];
+		});
 		return result.posts;
 	};
 
 	Posts.getPostData = async function (pid) {
 		const posts = await Posts.getPostsFields([pid], []);
+
 		return posts && posts.length ? posts[0] : null;
 	};
 
@@ -52,6 +61,19 @@ module.exports = function (Posts) {
 	Posts.setPostFields = async function (pid, data) {
 		await db.setObject(`post:${pid}`, data);
 		plugins.hooks.fire('action:post.setFields', { data: { ...data, pid } });
+	};
+	Posts.getEndorsedUsers = async function (pids) {
+		const upvoterIds = await db.getSetsMembers(pids.map(pid => `pid:${pid}:upvote`));
+		const flattenedUpvoterIds = [... new Set(upvoterIds.flat())];
+
+		const userDataMap = (await user.getUsersFields(flattenedUpvoterIds, ['username'])).reduce((acc, user) => ({ ...acc, [user.uid]: user }), {});
+		const userGroupsMap = (await groups.getUserGroups(flattenedUpvoterIds))
+			.reduce((acc, groups, i) => ({ ...acc, [flattenedUpvoterIds[i]]: groups }), {});
+		const specialUpvotes = upvoterIds.map(userIds =>
+			userIds.filter(uid =>
+				userGroupsMap[uid].find(group => group.name.toLowerCase() === 'instructor' || group.name.toLowerCase() === 'ta') !== undefined)
+				.map(uid => userDataMap[uid]));
+		return specialUpvotes;
 	};
 };
 

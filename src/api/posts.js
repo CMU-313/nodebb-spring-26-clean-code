@@ -42,6 +42,11 @@ postsAPI.get = async function (caller, data) {
 		post.content = '[[topic:post-is-deleted]]';
 	}
 
+	if (post.anonymous === 1) {
+		const isAdmin = await user.isAdministrator(caller.uid);
+		posts.anonymizePost(post, isAdmin);
+	}
+
 	return post;
 };
 
@@ -454,13 +459,13 @@ async function canSeeVotes(uid, cids, type) {
 	const cidToAllowed = _.zipObject(uniqCids, canRead);
 	const checks = cids.map(
 		(cid, index) => isAdmin || isMod[index] ||
-		(
-			cidToAllowed[cid] &&
 			(
-				meta.config[type] === 'all' ||
-				(meta.config[type] === 'loggedin' && parseInt(uid, 10) > 0)
+				cidToAllowed[cid] &&
+				(
+					meta.config[type] === 'all' ||
+					(meta.config[type] === 'loggedin' && parseInt(uid, 10) > 0)
+				)
 			)
-		)
 	);
 	return isArray ? checks : checks[0];
 }
@@ -571,7 +576,11 @@ postsAPI.getReplies = async (caller, { pid }) => {
 		privileges.posts.get(pids, uid),
 	]);
 	postData = await topics.addPostData(postData, uid);
-	postData.forEach((postData, index) => posts.modifyPostByPrivilege(postData, postPrivileges[index]));
+	const isAdmin = await user.isAdministrator(uid);
+	postData.forEach((postData, index) => {
+		posts.modifyPostByPrivilege(postData, postPrivileges[index]);
+		posts.anonymizePost(postData, isAdmin);
+	});
 	postData = postData.filter((postData, index) => postData && postPrivileges[index].read);
 	postData = await user.blocks.filter(uid, postData);
 

@@ -1,5 +1,5 @@
 dump.rdb
-
+dump2.rdb
 dist/
 yarn.lock
 npm-debug.log
@@ -78,3 +78,5 @@ test.sh
 dump.rdb
 .archiver_shadow/
 .snapshots/
+
+.env

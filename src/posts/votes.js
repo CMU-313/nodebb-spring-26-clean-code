@@ -190,20 +190,20 @@ module.exports = function (Posts) {
 				await db.sortedSetAdd(`uid:${uid}:downvote`, now, pid);
 			}
 		}
-
 		const postData = await Posts.getPostFields(pid, ['pid', 'uid', 'tid']);
 		const newReputation = await user.incrementUserReputationBy(postData.uid, type === 'upvote' ? 1 : -1);
 
 		await adjustPostVotes(postData, uid, type, unvote);
 
 		await fireVoteHook(postData, uid, type, unvote, voteStatus);
+		const endorsedData = (await Posts.getEndorsedUsers([pid]))[0];
 
 		return {
 			user: {
 				reputation: newReputation,
 			},
 			fromuid: uid,
-			post: postData,
+			post: { ...postData, endorsedVotes: endorsedData },
 			upvote: type === 'upvote' && !unvote,
 			downvote: type === 'downvote' && !unvote,
 		};

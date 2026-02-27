@@ -28,6 +28,7 @@ require('./posts')(Topics);
 require('./follow')(Topics);
 require('./tags')(Topics);
 require('./teaser')(Topics);
+require('./endorsed')(Topics);
 Topics.scheduled = require('./scheduled');
 require('./suggested')(Topics);
 require('./tools')(Topics);
@@ -95,13 +96,14 @@ Topics.getTopicsByTids = async function (tids, options) {
 			return data;
 		}
 
-		const [teasers, users, userSettings, categoriesData, guestHandles, thumbs] = await Promise.all([
+		const [teasers, users, userSettings, categoriesData, guestHandles, thumbs, isTopicEndorsed] = await Promise.all([
 			Topics.getTeasers(topics, options),
 			user.getUsersFields(uids, ['uid', 'username', 'fullname', 'userslug', 'reputation', 'postcount', 'picture', 'signature', 'banned', 'status']),
 			loadShowfullnameSettings(),
 			categories.getCategoriesFields(cids, ['cid', 'name', 'slug', 'icon', 'backgroundImage', 'imageClass', 'bgColor', 'color', 'disabled']),
 			loadGuestHandles(),
 			Topics.thumbs.load(topics),
+			Topics.getEndorsedStatus(topics),
 		]);
 
 		users.forEach((userObj, idx) => {
@@ -118,6 +120,7 @@ Topics.getTopicsByTids = async function (tids, options) {
 			categoriesMap: _.zipObject(cids, categoriesData),
 			tidToGuestHandle: _.zipObject(guestTopics.map(t => t.tid), guestHandles),
 			thumbs,
+			isTopicEndorsed,
 		};
 	}
 
@@ -140,6 +143,7 @@ Topics.getTopicsByTids = async function (tids, options) {
 				topic.user.displayname = topic.user.username;
 			}
 			topic.teaser = result.teasers[i] || null;
+			topic.endorsed = result.isTopicEndorsed[i];
 			topic.isOwner = topic.uid === parseInt(uid, 10);
 			topic.ignored = followData[i].ignoring;
 			topic.followed = followData[i].following;

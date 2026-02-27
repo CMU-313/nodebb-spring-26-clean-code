@@ -14,15 +14,14 @@ const privileges = require('../privileges');
 const utils = require('../utils');
 
 module.exports = function (Posts) {
-	Posts.getUserInfoForPosts = async function (uids, uid) {
+	Posts.getUserInfoForPosts = async function (uids, meUid) {
 		const [userData, userSettings, signatureUids] = await Promise.all([
-			getUserData(uids, uid),
+			getUserData(uids, meUid),
 			user.getMultipleUserSettings(uids),
 			meta.config.disableSignatures ? [] : privileges.categories.filterUids('signature', 0, uids),
 		]);
 		const uidsSignatureSet = new Set(signatureUids.map(uid => parseInt(uid, 10)));
 		const groupsMap = await getGroupsMap(userData);
-
 		userData.forEach((userData, index) => {
 			userData.signature = validator.escape(String(userData.signature || ''));
 			userData.fullname = userSettings[index].showfullname ? validator.escape(String(userData.fullname || '')) : undefined;
@@ -36,7 +35,7 @@ module.exports = function (Posts) {
 		const result = await Promise.all(userData.map(async (userData) => {
 			const [isMemberOfGroups, signature, customProfileInfo] = await Promise.all([
 				checkGroupMembership(userData.uid, userData.groupTitleArray),
-				parseSignature(userData, uid, uidsSignatureSet),
+				parseSignature(userData, meUid, uidsSignatureSet),
 				plugins.hooks.fire('filter:posts.custom_profile_info', { profile: [], uid: userData.uid }),
 			]);
 

@@ -40,6 +40,8 @@ module.exports = function (Posts) {
 		const tidToTopic = toObject('tid', topicsAndCategories.topics);
 		const cidToCategory = toObject('cid', topicsAndCategories.categories);
 
+		const isAdmin = await user.isAdministrator(uid);
+
 		posts.forEach((post) => {
 			// If the post author isn't represented in the retrieved users' data,
 			// then it means they were deleted, assume guest.
@@ -53,6 +55,8 @@ module.exports = function (Posts) {
 			post.user = uidToUser[post.uid];
 			Posts.overrideGuestHandle(post, post.handle);
 			post.handle = undefined;
+
+			Posts.anonymizePost(post, isAdmin);
 			post.topic = tidToTopic[post.tid];
 			post.category = post.topic && cidToCategory[post.topic.cid];
 			post.isMainPost = post.topic && post.pid === post.topic.mainPid;

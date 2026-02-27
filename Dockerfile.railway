@@ -1,0 +1,32 @@
+FROM mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm
+COPY . /app
+WORKDIR /app
+
+ARG NODEBB_PORT
+ARG NODEBB_DB
+ARG REDIS_URL
+ARG NODEBB_ADMIN_USERNAME
+ARG NODEBB_ADMIN_PASSWORD
+ARG NODEBB_ADMIN_EMAIL
+ARG NODEBB_URL
+ARG NODE_ENV
+SHELL ["/bin/bash", "-c"] 
+
+RUN rm -f ./dump.rdb
+RUN apt-get update \
+  && apt-get install -y \
+  iputils-ping \
+  redis-server \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN set -eu; \
+  . ./parse-redis-url.sh \ 
+  && curl https://qlty.sh | /bin/bash \
+  && mv ~/.qlty/bin/qlty /usr/local/bin/qlty \
+  && rm -rf ~/.qlty \
+  && qlty --version \
+  && ./nodebb setup
+
+EXPOSE 4567
+RUN npm i
+CMD ["/bin/sh","./railway-start.sh"]

@@ -73,6 +73,10 @@ define('categoryFilter', ['categorySearch', 'api', 'hooks'], function (categoryS
 			const icon = categoryEl.find('[component="category/select/icon"]');
 
 			if (cid !== 'all') {
+				if (selectedCids.length === 1 && selectedCids[0] === 'all') {
+					selectedCids = [];
+				}
+				
 				if (selectedCids.includes(cid)) {
 					selectedCids.splice(selectedCids.indexOf(cid), 1);
 				} else {
@@ -86,7 +90,7 @@ define('categoryFilter', ['categorySearch', 'api', 'hooks'], function (categoryS
 			} else {
 				el.find('[component="category/select/icon"]').addClass('invisible');
 				listEl.find('[data-cid="all"] i').removeClass('invisible');
-				selectedCids = [];
+				selectedCids = ['all']; // IMPORTANT: backend expects this
 			}
 
 			options.selectedCids = selectedCids;
@@ -106,7 +110,11 @@ define('categoryFilter', ['categorySearch', 'api', 'hooks'], function (categoryS
 				bgColor: '#ddd',
 			});
 		} else if (selectedCids.length === 1) {
-			api.get(`/categories/${selectedCids[0]}`, {}).then(renderButton);
+			if (selectedCids[0] === 'all') {
+				renderButton(); // default button
+			} else {
+				api.get(`/categories/${selectedCids[0]}`, {}).then(renderButton);
+			}
 		} else {
 			renderButton();
 		}
