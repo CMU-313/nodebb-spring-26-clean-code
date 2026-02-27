@@ -43,3 +43,12 @@ This feature forces all users in the instructor and TA groups to have a badge (e
 #### Unit Testing
 
 In `test/user.js`, I wrote the test 'should force instructor group onto groupTitleArray even if user deselects it' to test functionality. We set up the test by creating and joining the groups `ta`, `instructor`, and `other-group`. The subsequent `User.updateProfile(testUid, { groupTitle: '[]', uid: testUid })` call is akin to the user going into their settings and setting the group badge display to be false for all groups. We then verify that when getting user data, the `ta` and `instructor` groups are still present in the `groupTitleArray` field. This test covers all of the changed lines of code.
+
+### Mark as answer
+
+- dropdown tool rendering process checks if the original post was made by the user and if the topic is a question before allowing user to mark post as endorsed
+  probably run through the upvote code logic
+
+just have a title status indicator for now, if resolved
+
+top-level resolved: property, put the PID (link?)

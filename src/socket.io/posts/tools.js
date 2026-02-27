@@ -4,6 +4,7 @@ const nconf = require('nconf');
 
 const db = require('../../database');
 const posts = require('../../posts');
+const topics = require('../../topics');
 const flags = require('../../flags');
 const privileges = require('../../privileges');
 const plugins = require('../../plugins');
@@ -19,8 +20,9 @@ module.exports = function (SocketPosts) {
 			throw new Error('[[error:invalid-data]]');
 		}
 		const cid = await posts.getCidByPid(data.pid);
+		// const postsData = await topics.getTopicPosts(topicData, `tid:${tid}:posts`, 0, 0, topic.userId, false);
 		const results = await utils.promiseParallel({
-			posts: posts.getPostFields(data.pid, ['deleted', 'bookmarks', 'uid', 'ip', 'flagId', 'url']),
+			posts: posts.getPostFields(data.pid, ['deleted', 'bookmarks', 'uid', 'ip', 'flagId', 'url', 'tid']),
 			isAdmin: user.isAdministrator(socket.uid),
 			isGlobalMod: user.isGlobalModerator(socket.uid),
 			isModerator: user.isModerator(socket.uid, cid),
@@ -35,12 +37,15 @@ module.exports = function (SocketPosts) {
 			history: posts.diffs.exists(data.pid),
 			canViewInfo: privileges.global.can('view:users:info', socket.uid),
 		});
+		const topicData = await topics.getTopicData(results.posts.tid);
+		const firstPost = await posts.getPostFields(topicData.mainPid, ['uid']);
 
 		const postData = results.posts;
 		postData.pid = data.pid;
 		postData.absolute_url = `${nconf.get('url')}/post/${encodeURIComponent(data.pid)}`;
 		postData.bookmarked = results.bookmarked;
 		postData.selfPost = socket.uid && socket.uid === postData.uid;
+		postData.display_mark_as_answer = socket.uid === firstPost.uid && topicData.type === 'question'; // only original poster can mark posts as answer
 		postData.display_edit_tools = results.canEdit.flag;
 		postData.display_delete_tools = results.canDelete.flag;
 		postData.display_purge_tools = results.canPurge;
@@ -70,7 +75,7 @@ module.exports = function (SocketPosts) {
 			tools: [],
 		});
 		postData.tools = tools;
-
+		// console.log(results);
 		return results;
 	};
 

@@ -164,10 +164,10 @@ module.exports = function (Topics) {
 		topicData.posts.forEach((post) => {
 			if (post) {
 				// Anonymize posts with anonymous flag for non-admin viewers
-				posts.anonymizePost(post, topicPrivileges.isAdmin === true);
-
+				posts.anonymizePost(post, topicPrivileges.isAdmin || post.selfPost);
 				post.topicOwnerPost = parseInt(topicData.uid, 10) === parseInt(post.uid, 10);
 				post.display_edit_tools = topicPrivileges.isAdminOrMod || (post.selfPost && topicPrivileges['posts:edit']);
+				post.display_mark_as_answer = topicData.posts[0].selfPost && topicData.type === 'question'; // only original poster can set answer
 				post.display_delete_tools = topicPrivileges.isAdminOrMod || (post.selfPost && topicPrivileges['posts:delete']);
 				post.display_moderator_tools = post.display_edit_tools || post.display_delete_tools;
 				post.display_move_tools = topicPrivileges.isAdminOrMod && post.index !== 0;

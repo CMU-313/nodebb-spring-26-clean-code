@@ -105,7 +105,9 @@
 			{{{ if posts.user.signature }}}
 			<div component="post/signature" data-uid="{posts.user.uid}" class="text-xs text-muted mt-2">{posts.user.signature}</div>
 			{{{ end }}}
-
+			
+			<div component="post/marked_as_answer" class="{{{ if (posts.pid!=marked_answer)}}} hidden {{{ end }}}"></div>
+			
 			<div class="d-flex flex-wrap-reverse gap-2 {{{ if (hideReplies || !posts.replies.count) }}}justify-content-end{{{ else }}}justify-content-between{{{ end }}}">
 				{{{ if !hideReplies }}}
 				<a component="post/reply-count" data-target-component="post/replies/container" href="#" class="d-flex gap-2 align-items-center btn btn-ghost ff-secondary border rounded-1 p-1 text-muted text-decoration-none text-xs {{{ if (!./replies || shouldHideReplyContainer(@value)) }}}hidden{{{ end }}}">
@@ -150,7 +152,6 @@
 						{{{ end }}}
 					</div>
 					{{{ end }}}
-
 					<!-- IMPORT partials/topic/post-menu.tpl -->
 				</div>
 			</div>
