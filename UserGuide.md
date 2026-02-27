@@ -47,13 +47,13 @@ In `test/user.js`, I wrote the test 'should force instructor group onto groupTit
 ### All posts are either questions or notes
 
 Like Piazza, students can now only post either questions or notes. (Clicking submit will create a question, while clicking Create New Note will, well, create a new note.)
-![alt text](image.png)
+![alt text](readme-images/create-new-topic.png)
 
 to resolve a question, the original poster can open the dropdown menu on any post and click "Mark as answer". Only the original poster will see this option on the frontend.
-![alt text](image-2.png)
+![alt text](readme-images/mark-as-answer.png)
 
 Once a question has been resolved, a green rectangle will appear behind the answer post and the question tag will turn green. The change happens instantly, without needing a refresh, and is also persisted when the user refreshes the page.
-![alt text](image-3.png)
+![alt text](readme-images/resolved.png)
 
 ### Unit testing
 
