@@ -23,11 +23,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      TEST_ENV: 'production'
+      TEST_ENV: "production"
 
     services:
       redis:
-        image: 'redis:8.0.1'
+        image: "redis:8.0.1"
         # Set health checks to wait until redis has started
         options: >-
           --health-cmd "redis-cli ping"
@@ -90,3 +90,5 @@ jobs:
 
       - name: Test coverage
         uses: coverallsapp/github-action@v2
+        with:
+          fail-on-error: false
