@@ -475,6 +475,7 @@ define('composer', [
 			canUploadFile: app.user.privileges['upload:post:file'] && (config.maximumFileSize > 0 || app.user.isAdmin),
 			showHandleInput: config.allowGuestHandles &&
 				(app.user.uid === 0 || (isEditing && isGuestPost && app.user.isAdmin)),
+			showAnonymousToggle: config.allowAnonymousPosts,
 			handle: postData ? postData.handle || '' : undefined,
 			formatting: composer.formatting,
 			tagWhitelist: postData.category ? postData.category.tagWhitelist : ajaxify.data.tagWhitelist,
@@ -665,6 +666,7 @@ define('composer', [
 		var titleEl = postContainer.find('.title');
 		var bodyEl = postContainer.find('textarea');
 		var thumbEl = postContainer.find('input#topic-thumb-url');
+		var anonymousEl = postContainer.find('input[name="anonymous"]');
 		var onComposeRoute = postData.hasOwnProperty('template') && postData.template.compose === true;
 		const submitBtn = postContainer.find('.composer-submit');
 
@@ -733,6 +735,7 @@ define('composer', [
 				tags: tags.getTags(post_uuid),
 				thumbs: postData.thumbs || [],
 				timestamp: scheduler.getTimestamp(),
+				anonymous: anonymousEl.length ? anonymousEl.prop('checked') : false,
 			};
 		} else if (action === 'posts.reply') {
 			route = `/topics/${postData.tid}`;
@@ -742,6 +745,7 @@ define('composer', [
 				handle: handleEl ? handleEl.val() : undefined,
 				content: bodyEl.val(),
 				toPid: postData.toPid,
+				anonymous: anonymousEl.length ? anonymousEl.prop('checked') : false,
 			};
 		} else if (action === 'posts.edit') {
 			method = 'put';
