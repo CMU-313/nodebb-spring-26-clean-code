@@ -32,8 +32,9 @@
 	<div class="d-flex flex-column gap-3">
 		<div class="d-flex gap-2 flex-wrap flex-column flex-md-row {{{ if config.theme.centerHeaderElements }}}justify-content-center{{{ else }}}justify-content-between{{{ end }}}">
 			<div class="d-flex flex-column gap-3">
-				<h1 component="post/header" class="tracking-tight fw-semibold fs-3 mb-0 text-break {{{ if config.theme.centerHeaderElements }}}text-center{{{ end }}}">
+				<h1 component="post/header" class="tracking-tight fw-semibold fs-3 mb-0 text-break d-flex align-items-center gap-2 {{{ if config.theme.centerHeaderElements }}}text-center{{{ end }}}">
 					<span class="topic-title" component="topic/title">{title}</span>
+					<span component="post/header/type" class="badge badge-pill fs-6 {{{ if (type == "question") }}} {{{ if marked_answer }}} bg-success {{{ else }}} bg-primary {{{ end }}} {{{ else }}} bg-secondary {{{ end }}}"><i class="fa fa-solid {{{ if (type == "question") }}} fa-circle-question {{{ else }}} fa-note-sticky {{{ end }}}"></i>&nbsp;&nbsp;{type}</span>
 				</h1>
 
 				<div class="topic-info d-flex gap-2 align-items-center flex-wrap {{{ if config.theme.centerHeaderElements }}}justify-content-center{{{ end }}}">

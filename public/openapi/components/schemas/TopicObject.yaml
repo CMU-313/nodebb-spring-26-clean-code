@@ -3,6 +3,8 @@ TopicObject:
     - $ref: "#/TopicObjectSlim"
     - type: object
       properties:
+        type:
+          type: string
         lastposttime:
           type: number
         category:
@@ -293,6 +295,8 @@ TopicObjectSlim:
             - type: number
             - type: string
           nullable: true
+        type:
+          type: string
         thumbs:
           type: array
           items:

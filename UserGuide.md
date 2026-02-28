@@ -44,6 +44,27 @@ This feature forces all users in the instructor and TA groups to have a badge (e
 
 In `test/user.js`, I wrote the test 'should force instructor group onto groupTitleArray even if user deselects it' to test functionality. We set up the test by creating and joining the groups `ta`, `instructor`, and `other-group`. The subsequent `User.updateProfile(testUid, { groupTitle: '[]', uid: testUid })` call is akin to the user going into their settings and setting the group badge display to be false for all groups. We then verify that when getting user data, the `ta` and `instructor` groups are still present in the `groupTitleArray` field. This test covers all of the changed lines of code.
 
+### All posts are either questions or notes
+
+Like Piazza, students can now only post either questions or notes. (Clicking submit will create a question, while clicking Create New Note will, well, create a new note.)
+
+![alt text](readme-images/create-new-topic.png)
+
+to resolve a question, the original poster can open the dropdown menu on any post and click "Mark as answer". Only the original poster will see this option on the frontend.
+![alt text](readme-images/mark-as-answer.png)
+
+Once a question has been resolved, a green rectangle will appear behind the answer post and the question tag will turn green. The change happens instantly, without needing a refresh, and is also persisted when the user refreshes the page.
+![alt text](readme-images/resolved.png)
+
+### Unit testing
+
+`test/post-answer.js` tests the following:
+
+- make a topic of type note
+- make a topic of type question
+- mark a reply as answer
+- get the topic data again, where the data now should have the reply as a marked_answer.
+
 ### Anonymous Posts — Hide Author Identity (#7)
 
 When a post is created with `anonymous: 1`, the author's identity is hidden from non-admin users across the entire platform. Admins always see the real identity.
