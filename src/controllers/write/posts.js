@@ -115,7 +115,7 @@ async function mock(req) {
 Posts.markAsAnswer = async (req, res) => {
 	const tid = await posts.getPostField(req.params.pid, 'tid');
 	const extraData = await mock(req);
-	await topics.setTopicField(tid, 'marked_answer', parseInt(req.params.pid));
+	await posts.markAsAnswer(tid, req.params.pid);
 	websockets.in(extraData.room_id).emit(`event:topic_marked_as_answer`, { pid: req.params.pid });
 	helpers.formatApiResponse(202, res);
 };

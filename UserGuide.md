@@ -58,14 +58,14 @@ Once a question has been resolved, a green rectangle will appear behind the answ
 
 ### Unit testing
 
-make a topic of type note
-make a topic of type question (i mean it is a post technically...)
+`test/post-answer.js` tests the following:
 
-get the topic as poster
-get the topic as non-poster
+- make a topic of type note
+- make a topic of type question
+- mark a reply as answer
+- get the topic data again, where the data now should have the reply as a marked_answer.
 
-mark a post as answer
-get the topic data again
+There is the problem that once you endorse a post, any call to `getTopicsByTids` will return the `marked_answer` field, even if you didn't specify that you want that field. Also I'm realizing that it should really be camelCase, but I ran out of time to change that.
 
 ### Anonymous Posts — Hide Author Identity (#7)
 

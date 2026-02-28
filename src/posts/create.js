@@ -91,6 +91,9 @@ module.exports = function (Posts) {
 		plugins.hooks.fire('action:post.save', { post: { ...result.post, _activitypub } });
 		return result.post;
 	};
+	Posts.markAsAnswer = async function (tid, pid) {
+		await topics.setTopicField(tid, 'marked_answer', parseInt(pid));
+	};
 
 	async function addReplyTo(postData, timestamp) {
 		if (!postData.toPid) {
