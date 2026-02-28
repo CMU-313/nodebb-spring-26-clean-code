@@ -112,6 +112,9 @@ TopicObject:
             sourceContent:
               type: string
               nullable: true
+            anonymous:
+              type: number
+              description: Whether this post was made anonymously (1 for anonymous, 0 for not)
             endorsedVotes:
               type: array
               items:
