@@ -65,8 +65,6 @@ Once a question has been resolved, a green rectangle will appear behind the answ
 - mark a reply as answer
 - get the topic data again, where the data now should have the reply as a marked_answer.
 
-There is the problem that once you endorse a post, any call to `getTopicsByTids` will return the `marked_answer` field, even if you didn't specify that you want that field. Also I'm realizing that it should really be camelCase, but I ran out of time to change that.
-
 ### Anonymous Posts — Hide Author Identity (#7)
 
 When a post is created with `anonymous: 1`, the author's identity is hidden from non-admin users across the entire platform. Admins always see the real identity.
