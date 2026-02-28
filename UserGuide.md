@@ -84,3 +84,55 @@ Tests are split across two files:
 - **Category page rendering**: the Read API response at `/api/category/{slug}` includes `grouped` and `dateGroups` fields, the "Pinned" group appears first when pinned topics exist, and each topic in `dateGroups` contains standard topic fields (`tid`, `uid`, `cid`, `title`, `slug`, `timestamp`, `postcount`)
 
 
+### Anonymous Posts — Hide Author Identity (#7)
+
+When a post is created with `anonymous: 1`, the author's identity is hidden from non-admin users across the entire platform. Admins always see the real identity.
+
+#### What is anonymized
+
+- **Topic view**: Anonymous posts show "Anonymous" username with a "?" avatar. Profile links are disabled.
+- **Parent/quoted posts**: When replying to an anonymous post, the parent preview shows "Anonymous" instead of the real author.
+- **Reply avatar previews**: The small avatar previews shown below a post (indicating who replied) show "Anonymous" for anonymous replies.
+- **Category teasers**: The recent post preview on the categories page shows "Anonymous" for anonymous posts.
+- **User profile pages**: Anonymous posts are excluded from `/user/:slug/posts` and the profile's latest/best posts for non-admin, non-self viewers.
+- **Post count**: The post count displayed on user profiles excludes anonymous posts for non-admin, non-self viewers.
+
+#### User Testing
+
+Since the composer UI toggle for anonymous posting (Issue #5) is not yet implemented, anonymous posts must be created via the API:
+
+1. Sign into the admin account
+1. Open the browser console and run:
+   ```js
+   fetch('/api/config', {credentials:'same-origin'})
+     .then(r => r.json())
+     .then(async cfg => {
+       const res = await fetch('/api/v3/topics/1', {
+         method: 'POST',
+         credentials: 'same-origin',
+         headers: {
+           'Content-Type': 'application/json',
+           'x-csrf-token': cfg.csrf_token,
+         },
+         body: JSON.stringify({
+           content: 'This is an anonymous reply',
+           anonymous: 1,
+         }),
+       });
+       const data = await res.json();
+       console.log('Created anonymous post, pid:', data.response.pid);
+     });
+   ```
+1. View the topic — the admin should see the real identity on the anonymous post
+1. Log in as a regular user (non-admin)
+1. View the same topic — the anonymous post should show "Anonymous" with a "?" avatar
+1. Visit the admin's profile page — the anonymous post should not appear in their post history, and the post count should not include it
+1. Visit the categories page — the teaser preview should show "Anonymous" if the anonymous post is the most recent
+
+#### Unit Testing
+
+Seven new tests were added to `test/posts.js` inside the existing `describe('Anonymous posts', ...)` block:
+
+- **Parent post anonymization** (2 tests): Verifies that the parent post preview shows "Anonymous" for regular users and the real username for admins.
+- **Reply avatar preview anonymization** (2 tests): Verifies that reply avatar previews show the anonymous placeholder for regular users and the real avatar for admins.
+- **Profile history filtering** (3 tests): Verifies that anonymous posts are excluded from other users' profile post summaries, included in the author's own profile, and included for admin viewers.
