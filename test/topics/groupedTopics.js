@@ -232,8 +232,8 @@ describe('Grouped Topics Feature', () => {
             it('should sort topics within each group by timestamp descending (most recent first)', () => {
                 const now = Date.now();
                 const topicList = [
-                    { tid: 1, title: 'Older', timestamp: now - ONE_HOUR * 3, pinned: false },
-                    { tid: 2, title: 'Newer', timestamp: now - ONE_HOUR, pinned: false },
+                    { tid: 1, title: 'Older', timestamp: now - 2, pinned: false },
+                    { tid: 2, title: 'Newer', timestamp: now - 1, pinned: false },
                     { tid: 3, title: 'Newest', timestamp: now, pinned: false },
                 ];
                 const result = dateGrouping.groupTopicsByDateRange(topicList);
@@ -247,7 +247,7 @@ describe('Grouped Topics Feature', () => {
             it('should sort pinned topics by timestamp descending', () => {
                 const now = Date.now();
                 const topicList = [
-                    { tid: 1, title: 'Old pin', timestamp: now - 5000, pinned: true },
+                    { tid: 1, title: 'Old pin', timestamp: now - 1, pinned: true },
                     { tid: 2, title: 'New pin', timestamp: now, pinned: true },
                 ];
                 const result = dateGrouping.groupTopicsByDateRange(topicList);
