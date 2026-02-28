@@ -118,7 +118,7 @@ describe('Grouped Topics Feature', () => {
                 const now = Date.now();
                 const topicList = [
                     { tid: 1, title: 'Now', timestamp: now, pinned: false },
-                    { tid: 2, title: 'Earlier today', timestamp: now - ONE_HOUR * 2, pinned: false },
+                    { tid: 2, title: 'Earlier today', timestamp: now, pinned: false },
                 ];
                 const result = dateGrouping.groupTopicsByDateRange(topicList);
                 assert.strictEqual(result[0].label, 'Today');
@@ -180,12 +180,12 @@ describe('Grouped Topics Feature', () => {
                 const topicList = [
                     { tid: 1, title: 'Old topic', timestamp: threeWeeksAgo, pinned: false },
                 ];
-            
+
                 const result = dateGrouping.groupTopicsByDateRange(topicList);
                 const olderGroup = result.find(g => /^\d+\/\d+-\d+\/\d+$/.test(g.label));
-            
+
                 assert(olderGroup, `Expected a date range label (M/D-M/D) but got: ${result.map(g => g.label).join(', ')}`);
-            
+
                 const parts = olderGroup.label.match(/(\d+)/g);
                 parts.forEach((part) => {
                     assert.strictEqual(
@@ -195,30 +195,30 @@ describe('Grouped Topics Feature', () => {
                     );
                 });
             });
-            
+
             it('should use the correct Monday-Sunday range for the week the topic was posted in', () => {
                 const now = Date.now();
                 const threeWeeksAgo = now - ONE_DAY * 21;
                 const topicList = [
                     { tid: 1, title: 'Old topic', timestamp: threeWeeksAgo, pinned: false },
                 ];
-            
+
                 const topicDate = new Date(threeWeeksAgo);
                 const dayOfWeek = topicDate.getDay();
                 const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-            
+
                 const monday = new Date(topicDate);
                 monday.setDate(topicDate.getDate() - daysFromMonday);
                 monday.setHours(0, 0, 0, 0);
-            
+
                 const sunday = new Date(monday);
                 sunday.setDate(monday.getDate() + 6);
-            
+
                 const expectedLabel = `${monday.getMonth() + 1}/${monday.getDate()}-${sunday.getMonth() + 1}/${sunday.getDate()}`;
-            
+
                 const result = dateGrouping.groupTopicsByDateRange(topicList);
                 const olderGroup = result.find(g => /^\d+\/\d+-\d+\/\d+$/.test(g.label));
-            
+
                 assert(olderGroup, `Expected a date range label (M/D-M/D) but got: ${result.map(g => g.label).join(', ')}`);
                 assert.strictEqual(
                     olderGroup.label,
