@@ -30,6 +30,7 @@ define('forum/topic/events', [
 		'event:topic_unpinned': threadTools.setPinnedState,
 
 		'event:topic_moved': onTopicMoved,
+		'event:topic_marked_as_answer': onPostMarkedAsAnswer,
 
 		'event:post_edited': onPostEdited,
 		'event:post_purged': onPostPurged,
@@ -60,6 +61,12 @@ define('forum/topic/events', [
 			socket.removeListener(eventName, handler);
 		}
 	};
+	function onPostMarkedAsAnswer(data) {
+		const pid = data.pid;
+		$('[component="post/header/type"]').addClass('bg-success');
+		$(`[data-pid] [component='post/marked_as_answer']`).addClass('hidden');
+		$(`[data-pid=${pid}] [component='post/marked_as_answer']`).removeClass('hidden');
+	}
 
 	function onUserStatusChange(data) {
 		app.updateUserStatus($('[data-uid="' + data.uid + '"] [component="user/status"]'), data.status);

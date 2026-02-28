@@ -183,7 +183,19 @@ define('forum/topic/postTools', [
 				flags.resolve(flagId);
 			});
 		});
-
+		postContainer.on('click', '[component="post/mark-as-answer"]', function () {
+			const pid = $(this).closest('[data-pid]').attr('data-pid');
+			api.put(`/posts/${encodeURIComponent(pid)}/mark-as-answer`, {
+			}, function (err) {
+				if (err) {
+					if (!app.user.uid) {
+						ajaxify.go('login');
+						return;
+					}
+					return alerts.error(err);
+				}
+			});
+		});
 		postContainer.on('click', '[component="post/edit"]', function () {
 			const btn = $(this);
 

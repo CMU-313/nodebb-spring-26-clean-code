@@ -352,13 +352,18 @@ define('composer', [
 			e.stopPropagation(); // Other click events bring composer back to active state which is undesired on submit
 
 			$(this).attr('disabled', true);
-			post(post_uuid);
+			post(post_uuid, true);
+		});
+		postContainer.on('click', '[data-action="post-note"]', function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			post(post_uuid, false);
 		});
 
 		require(['mousetrap'], function (mousetrap) {
 			mousetrap(postContainer.get(0)).bind('mod+enter', function () {
 				postContainer.find('.composer-submit').attr('disabled', true);
-				post(post_uuid);
+				post(post_uuid, true);
 			});
 		});
 
@@ -447,7 +452,6 @@ define('composer', [
 		postData.category = await getSelectedCategory(postData);
 		const privileges = postData.category ? postData.category.privileges : ajaxify.data.privileges;
 		const topicTemplate = isTopic && postData.category ? postData.category.topicTemplate : '';
-
 		let data = {
 			topicTitle: postData.title,
 			titleLength: postData.title.length,
@@ -480,13 +484,12 @@ define('composer', [
 			tagWhitelist: postData.category ? postData.category.tagWhitelist : ajaxify.data.tagWhitelist,
 			privileges: app.user.privileges,
 			selectedCategory: postData.category,
-			submitOptions: [
+			submitOptions:
 				// Add items using `filter:composer.create`, or just add them to the <ul> in DOM
-				// {
-				//  action: 'foobar',
-				//  text: 'Text Label',
-				// }
-			],
+				postData.action === 'topics.post' ? [{
+					action: 'post-note',
+					text: 'Post New Note',
+				}] : [],
 		};
 
 		if (data.mobile) {
@@ -521,12 +524,12 @@ define('composer', [
 			resize.reposition(postContainer);
 			composer.enhance(postContainer, post_uuid, postData);
 			/*
-				Everything after this line is applied to the resizable composer only
-				Want something done to both resizable composer and the one in /compose?
-				Put it in composer.enhance().
+			Everything after this line is applied to the resizable composer only
+			Want something done to both resizable composer and the one in /compose?
+			Put it in composer.enhance().
 
-				Eventually, stuff after this line should be moved into composer.enhance().
-			*/
+			Eventually, stuff after this line should be moved into composer.enhance().
+		*/
 
 			activate(post_uuid);
 
@@ -658,7 +661,7 @@ define('composer', [
 		}, 20);
 	}
 
-	async function post(post_uuid) {
+	async function post(post_uuid, isQuestion) {
 		var postData = composer.posts[post_uuid];
 		var postContainer = $('.composer[data-uuid="' + post_uuid + '"]');
 		var handleEl = postContainer.find('.handle');
@@ -733,6 +736,7 @@ define('composer', [
 				tags: tags.getTags(post_uuid),
 				thumbs: postData.thumbs || [],
 				timestamp: scheduler.getTimestamp(),
+				postType: isQuestion ? 'question' : 'note',
 			};
 		} else if (action === 'posts.reply') {
 			route = `/topics/${postData.tid}`;
@@ -802,7 +806,7 @@ define('composer', [
 						window.history.back();
 					} else if (submitHookData.redirect &&
 						((ajaxify.data.template.name !== 'topic') ||
-						(ajaxify.data.template.topic && parseInt(postData.tid, 10) !== parseInt(ajaxify.data.tid, 10)))
+							(ajaxify.data.template.topic && parseInt(postData.tid, 10) !== parseInt(ajaxify.data.tid, 10)))
 					) {
 						ajaxify.go('post/' + data.pid);
 					}

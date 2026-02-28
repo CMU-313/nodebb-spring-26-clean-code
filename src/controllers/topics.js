@@ -89,7 +89,6 @@ topicsController.get = async function getTopic(req, res, next) {
 	const { start, stop } = calculateStartStop(currentPage, postIndex, settings);
 
 	await topics.getTopicWithPosts(topicData, set, req.uid, start, stop, reverse);
-
 	topics.modifyPostsByPrivilege(topicData, userPrivileges);
 	topicData.tagWhitelist = categories.filterTagWhitelist(topicData.tagWhitelist, userPrivileges.isAdminOrMod);
 
@@ -148,7 +147,6 @@ topicsController.get = async function getTopic(req, res, next) {
 		const href = utils.isNumber(pid) ? `${nconf.get('url')}/post/${pid}` : pid;
 		res.set('Link', `<${href}>; rel="alternate"; type="application/activity+json"`);
 	}
-
 	res.render('topic', topicData);
 };
 

@@ -1,3 +1,11 @@
+{{{ if posts.display_mark_as_answer }}}
+<li>
+	<a class="dropdown-item rounded-1 d-flex align-items-center gap-2" component="post/mark-as-answer" role="menuitem" href="#">
+		<span class="menu-icon" style="margin-left: 4px;"><i class="fa fa-solid text-secondary fa-check"></i></span> Mark as answer
+	</a>
+</li>
+{{{ end }}}
+
 {{{ if posts.display_moderator_tools }}}
 <li>
 	<a class="dropdown-item rounded-1 d-flex align-items-center gap-2" component="post/edit" role="menuitem" href="#">
