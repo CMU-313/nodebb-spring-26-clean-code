@@ -80,35 +80,21 @@ When a post is created with `anonymous: 1`, the author's identity is hidden from
 
 #### User Testing
 
-Since the composer UI toggle for anonymous posting (Issue #5) is not yet implemented, anonymous posts must be created via the API:
-
-1. Sign into the admin account
-1. Open the browser console and run:
-   ```js
-   fetch("/api/config", { credentials: "same-origin" })
-     .then((r) => r.json())
-     .then(async (cfg) => {
-       const res = await fetch("/api/v3/topics/1", {
-         method: "POST",
-         credentials: "same-origin",
-         headers: {
-           "Content-Type": "application/json",
-           "x-csrf-token": cfg.csrf_token,
-         },
-         body: JSON.stringify({
-           content: "This is an anonymous reply",
-           anonymous: 1,
-         }),
-       });
-       const data = await res.json();
-       console.log("Created anonymous post, pid:", data.response.pid);
-     });
-   ```
-1. View the topic — the admin should see the real identity on the anonymous post
-1. Log in as a regular user (non-admin)
-1. View the same topic — the anonymous post should show "Anonymous" with a "?" avatar
-1. Visit the admin's profile page — the anonymous post should not appear in their post history, and the post count should not include it
-1. Visit the categories page — the teaser preview should show "Anonymous" if the anonymous post is the most recent
+1. Sign in as an admin user.
+1. Go to **Admin → Settings → Post** and ensure **Allow anonymous posting** is enabled.
+1. Go to **View Forum** and select a category (such as **General Discussion**)
+1. Create a **New Topic**
+1. Verify there is a **Post anonymously** checkbox below the post content textarea (unchecked by default).
+1. Enter content, check **Post anonymously**, and submit.
+1. As admin, verify the post was created and can be moderated normally.
+1. Go to **Admin → Settings → Post** and disable **Allow anonymous posting**.
+1. Go to **View Forum** and select a category (such as **General Discussion**)
+1. Create a **New Topic**
+1. Verify there is no **Post anonymously** checkbox on the screen
+1. Sign in as a regular (non-admin) user and view the same topic.
+1. Verify that the anonymous post shows `Anonymous` with a `?` avatar and no profile link.
+1. Open the regular user-facing profile view for the original author and verify the anonymous post does not appear in post history and is excluded from displayed post counts.
+1. Go to the categories page and verify category teaser/preview data shows `Anonymous` when the latest post is anonymous.
 
 #### Unit Testing
 

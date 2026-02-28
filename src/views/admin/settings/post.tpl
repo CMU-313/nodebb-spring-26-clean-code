@@ -120,7 +120,7 @@
 				</div>
 
 				<div class="form-check form-switch mb-3">
-					<input class="form-check-input" type="checkbox" id="allowAnonymousPosts" data-field="allowAnonymousPosts">
+					<input class="form-check-input" type="checkbox" id="allowAnonymousPosts" data-field="allowAnonymousPosts" {{{ if allowAnonymousPosts }}}checked{{{ end }}}>
 					<label for="allowAnonymousPosts" class="form-check-label">[[admin/settings/post:allow-anonymous-posts]]</label>
 					<p class="form-text">[[admin/settings/post:allow-anonymous-posts-help]]</p>
 				</div>
