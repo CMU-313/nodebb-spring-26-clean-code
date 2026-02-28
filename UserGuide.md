@@ -43,3 +43,30 @@ This feature forces all users in the instructor and TA groups to have a badge (e
 #### Unit Testing
 
 In `test/user.js`, I wrote the test 'should force instructor group onto groupTitleArray even if user deselects it' to test functionality. We set up the test by creating and joining the groups `ta`, `instructor`, and `other-group`. The subsequent `User.updateProfile(testUid, { groupTitle: '[]', uid: testUid })` call is akin to the user going into their settings and setting the group badge display to be false for all groups. We then verify that when getting user data, the `ta` and `instructor` groups are still present in the `groupTitleArray` field. This test covers all of the changed lines of code.
+
+### Anonymous Posts — Hide Author Identity (#7)
+
+When a post is created with `anonymous: 1`, the author's identity is hidden from non-admin users across the entire platform. Admins always see the real identity.
+
+#### What is anonymized
+
+- **Topic view**: Anonymous posts show "Anonymous" username with a "?" avatar. Profile links are disabled.
+- **Parent/quoted posts**: When replying to an anonymous post, the parent preview shows "Anonymous" instead of the real author.
+- **Reply avatar previews**: The small avatar previews shown below a post (indicating who replied) show "Anonymous" for anonymous replies.
+- **Category teasers**: The recent post preview on the categories page shows "Anonymous" for anonymous posts.
+- **User profile pages**: Anonymous posts are excluded from `/user/:slug/posts` and the profile's latest/best posts for non-admin, non-self viewers.
+- **Post count**: The post count displayed on user profiles excludes anonymous posts for non-admin, non-self viewers.
+
+#### User Testing
+
+1. Sign into the admin account
+1. Go into the settings 
+2. Go into 
+
+#### Unit Testing
+
+Seven new tests were added to `test/posts.js` inside the existing `describe('Anonymous posts', ...)` block:
+
+- **Parent post anonymization** (2 tests): Verifies that the parent post preview shows "Anonymous" for regular users and the real username for admins.
+- **Reply avatar preview anonymization** (2 tests): Verifies that reply avatar previews show the anonymous placeholder for regular users and the real avatar for admins.
+- **Profile history filtering** (3 tests): Verifies that anonymous posts are excluded from other users' profile post summaries, included in the author's own profile, and included for admin viewers.
