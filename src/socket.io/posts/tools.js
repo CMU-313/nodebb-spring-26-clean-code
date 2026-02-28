@@ -20,7 +20,7 @@ module.exports = function (SocketPosts) {
 			throw new Error('[[error:invalid-data]]');
 		}
 		const cid = await posts.getCidByPid(data.pid);
-		// const postsData = await topics.getTopicPosts(topicData, `tid:${tid}:posts`, 0, 0, topic.userId, false);
+
 		const results = await utils.promiseParallel({
 			posts: posts.getPostFields(data.pid, ['deleted', 'bookmarks', 'uid', 'ip', 'flagId', 'url', 'tid']),
 			isAdmin: user.isAdministrator(socket.uid),
@@ -75,7 +75,6 @@ module.exports = function (SocketPosts) {
 			tools: [],
 		});
 		postData.tools = tools;
-		// console.log(results);
 		return results;
 	};
 
