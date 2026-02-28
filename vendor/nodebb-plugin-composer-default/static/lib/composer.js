@@ -347,24 +347,6 @@ define('composer', [
 		tags.init(postContainer, composer.posts[post_uuid]);
 		autocomplete.init(postContainer, post_uuid);
 
-		if (anonymousPostingEnabled() && !postContainer.find('input[name="anonymous"]').length) {
-			translator.translate('[[topic:composer.post-anonymously]]', function (translated) {
-				if (postContainer.find('input[name="anonymous"]').length) {
-					return;
-				}
-
-				const anonymousToggle = $(
-					'<div class="composer-anonymous-toggle form-check mt-1 ms-1">' +
-						'<label class="form-check-label d-flex align-items-center gap-2">' +
-							'<input class="form-check-input mt-0" type="checkbox" name="anonymous">' +
-							'<span>' + translated + '</span>' +
-						'</label>' +
-					'</div>'
-				);
-				postContainer.find('.write-container .write').after(anonymousToggle);
-			});
-		}
-
 		postContainer.on('change', 'input, textarea', function () {
 			composer.posts[post_uuid].modified = true;
 		});

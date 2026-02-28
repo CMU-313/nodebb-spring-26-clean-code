@@ -61,10 +61,15 @@ When a post is created with `anonymous: 1`, the author's identity is hidden from
 
 1. Sign in as an admin user.
 1. Go to **Admin → Settings → Post** and ensure **Allow anonymous posting** is enabled.
-1. Open a topic or create a new topic and launch the composer.
+1. Go to **View Forum** and select a category (such as **General Discussion**)
+1. Create a **New Topic**
 1. Verify there is a **Post anonymously** checkbox below the post content textarea (unchecked by default).
 1. Enter content, check **Post anonymously**, and submit.
 1. As admin, verify the post was created and can be moderated normally.
+1. Go to **Admin → Settings → Post** and disable **Allow anonymous posting**.
+1. Go to **View Forum** and select a category (such as **General Discussion**)
+1. Create a **New Topic**
+1. Verify there is no **Post anonymously** checkbox on the screen
 1. Sign in as a regular (non-admin) user and view the same topic.
 1. Verify that the anonymous post shows `Anonymous` with a `?` avatar and no profile link.
 1. Open the regular user-facing profile view for the original author and verify the anonymous post does not appear in post history and is excluded from displayed post counts.
