@@ -36,7 +36,7 @@ module.exports = function (grunt) {
 	});
 
 	grunt.loadNpmTasks('grunt-contrib-watch');
-
+	grunt.loadNpmTasks('grunt-retire');
 	grunt.registerTask('default', ['watch']);
 
 	grunt.registerTask('init', async function () {
