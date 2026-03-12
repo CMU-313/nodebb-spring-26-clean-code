@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "_comment": "This config was generated using 'stryker init'. Please take a look at: https://stryker-mutator.io/docs/stryker-js/configuration/ for more information.",
+  "packageManager": "npm",
+  "reporters": [
+    "html",
+    "clear-text",
+    "progress"
+  ],
+  "testRunner": "command",
+  "commandRunner": {
+    "command": "npm run test:prod"
+  },
+  "coverageAnalysis": "off",
+  "buildCommand": "npx cross-env NODE_ENV=production ./nodebb build",
+  "symlinkNodeModules": true,
+  "mutate": [
+    "src/**/*.js",
+    "!src/cli/**/*.js"
+  ],
+  "disableBail": true,
+  "disableTypeChecks": "src/**/*.{js,ts,jsx,tsx,html,vue,mjs,mts,cjs,cts}",
+  "ignorePatterns": ["build/**", "node_modules/**", ".archiver_shadow/**", ".stryker-tmp/**"]
+}
