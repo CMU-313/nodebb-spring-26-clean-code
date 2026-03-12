@@ -140,6 +140,7 @@
         "snyk": "^1.1303.1",
         "socket.io": "4.8.3",
         "socket.io-client": "4.8.3",
+        "@socket.io/redis-adapter": "8.3.0",
         "sortablejs": "1.15.6",
         "spdx-license-list": "6.11.0",
         "terser-webpack-plugin": "5.3.16",
