@@ -13,7 +13,7 @@ export const options = {
   },
 };
 
-const BASE_URL = "http://17313-team11.s3d.cmu.edu:4567";
+const BASE_URL = "http://127.0.0.1:4567";
 
 export default function () {
   const homeRes = http.get(`${BASE_URL}/`);
