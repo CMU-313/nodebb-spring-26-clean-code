@@ -130,6 +130,9 @@ TopicObject:
                     type: string
                   isLocal:
                     type: boolean
+            translatedContent:
+              type: string
+              nullable: true
             timestampISO:
               type: string
               description: An ISO 8601 formatted date string (complementing `timestamp`)
@@ -170,6 +173,8 @@ TopicObject:
                   example: "#f44336"
             index:
               type: number
+            isEnglish:
+              type: boolean
           nullable: true
         tags:
           type: array

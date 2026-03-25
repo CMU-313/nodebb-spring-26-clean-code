@@ -162,6 +162,9 @@ get:
                                 anonymous:
                                   type: number
                                   description: Whether this post was made anonymously (1 for anonymous, 0 for not)
+                                translatedContent:
+                                  type: string
+                                  nullable: true
                                 timestampISO:
                                   type: string
                                   description: An ISO 8601 formatted date string (complementing `timestamp`)
@@ -202,6 +205,8 @@ get:
                                       example: "#f44336"
                                 index:
                                   type: number
+                                isEnglish:
+                                  type: boolean
                             tags:
                               type: array
                               items:
