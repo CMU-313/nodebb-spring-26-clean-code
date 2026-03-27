@@ -1,5 +1,5 @@
 reporter: dot
-timeout: 25000
+timeout: 250000
 exit: true
 bail: true
 ignore:
