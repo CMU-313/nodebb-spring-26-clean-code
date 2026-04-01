@@ -175,6 +175,8 @@ TopicObject:
               type: number
             isEnglish:
               type: boolean
+            isTranslating:
+              type: boolean
           nullable: true
         tags:
           type: array

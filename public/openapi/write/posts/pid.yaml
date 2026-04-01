@@ -39,6 +39,8 @@ get:
                         type: boolean
                       translatedContent:
                         type: string
+                      isTranslating:
+                        type: boolean
                       timestamp:
                         type: number
                       flagId:
