@@ -12,6 +12,8 @@ const categories = require('../categories');
 const utils = require('../utils');
 
 module.exports = function (Posts) {
+	// called when you reply to a post (Topics.reply -> onNewPost -> getPostSummaryByPids) 
+	// among the other billion pipelines
 	Posts.getPostSummaryByPids = async function (pids, uid, options) {
 		if (!Array.isArray(pids) || !pids.length) {
 			return [];
@@ -22,7 +24,7 @@ module.exports = function (Posts) {
 		options.escape = options.hasOwnProperty('escape') ? options.escape : false;
 		options.extraFields = options.hasOwnProperty('extraFields') ? options.extraFields : [];
 
-		const fields = ['pid', 'tid', 'toPid', 'url', 'content', 'sourceContent', 'uid', 'timestamp', 'deleted', 'upvotes', 'downvotes', 'replies', 'handle', 'anonymous', 'isEnglish', 'translatedContent'].concat(options.extraFields);
+		const fields = ['pid', 'tid', 'toPid', 'url', 'content', 'sourceContent', 'uid', 'timestamp', 'deleted', 'upvotes', 'downvotes', 'replies', 'handle', 'anonymous', 'isEnglish', 'translatedContent', 'isTranslating'].concat(options.extraFields);
 
 		let posts = await Posts.getPostsFields(pids, fields);
 		posts = posts.filter(Boolean);
