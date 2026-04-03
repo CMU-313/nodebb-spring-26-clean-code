@@ -10,7 +10,6 @@ services:
       - nodebb-uploads:/usr/src/app/public/uploads
       - nodebb-config:/opt/config
       - ./install/docker/setup.json:/usr/src/app/setup.json
-    network_mode: "host"
     
 
   mongo:
