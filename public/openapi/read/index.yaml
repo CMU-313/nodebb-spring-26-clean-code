@@ -81,6 +81,8 @@ get:
                                               type: boolean
                                             translatedContent:
                                               type: string
+                                            isTranslating:
+                                              type: boolean
                                             timestampISO:
                                               type: string
                                               description: An ISO 8601 formatted date string (complementing `timestamp`)
@@ -181,7 +183,9 @@ get:
                                   isEnglish:
                                     type: boolean
                                   translatedContent:
-                                    type: string                                  
+                                    type: string
+                                  isTranslating:
+                                    type: boolean
                                   sourceContent:
                                     type: string
                                     nullable: true

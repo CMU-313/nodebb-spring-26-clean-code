@@ -47,6 +47,7 @@ define('forum/topic/events', [
 
 		'event:new_notification': onNewNotification,
 		'event:new_post': posts.onNewPost,
+		'event:post_translated': onPostTranslated,
 	};
 
 	Events.init = function () {
@@ -270,6 +271,36 @@ define('forum/topic/events', [
 		post.find('[component="post/downvote"]').filter(function (index, el) {
 			return $(el).closest('[data-pid]').attr('data-pid') === String(data.post.pid);
 		}).toggleClass('downvoted', data.downvote);
+	}
+
+	function onPostTranslated(data) {
+		var postEl = $('[component="post"][data-pid="' + data.pid + '"]');
+		if (!postEl.length) {
+			return;
+		}
+
+		var contentEl = postEl.find('[component="post/content"]');
+		// Remove loading spinner
+		contentEl.find('.translation-loading').remove();
+
+		if (data.isEnglish === 'true' || data.isEnglish === true) {
+			// English — remove any translation UI
+			contentEl.find('.sensitive-content-message').remove();
+			contentEl.find('.translated-content').remove();
+		} else {
+			// Not English — show toggle button and populate translation
+			contentEl.find('.sensitive-content-message').remove();
+			contentEl.find('.translated-content').remove();
+
+			// Build elements safely using jQuery to prevent XSS
+			var msgDiv = $('<div class="sensitive-content-message"></div>');
+			var btn = $('<a class="btn btn-sm btn-primary view-translated-btn"></a>').text('Click here to view the translated message.');
+			msgDiv.append(btn);
+
+			var transDiv = $('<div class="translated-content" style="display:none;"></div>').text(data.translatedContent);
+
+			contentEl.append(msgDiv).append(transDiv);
+		}
 	}
 
 	function onNewNotification(data) {

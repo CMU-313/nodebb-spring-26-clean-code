@@ -83,14 +83,20 @@
 
 		<div class="content text-break" component="post/content" itemprop="text">
 			{posts.content}
-			{{{if !posts.isEnglish }}}
+			{{{if posts.isTranslating }}}
+			<div class="sensitive-content-message translation-loading">
+				<i class="fa fa-spinner fa-spin"></i> Translation in progress...
+			</div>
+			<div class="translated-content" style="display:none;"></div>
+			{{{end}}}
+			{{{if (!posts.isEnglish && !posts.isTranslating) }}}
 			<div class="sensitive-content-message">
-			<a class="btn btn-sm btn-primary view-translated-btn">Click here to view the translated message.</a>
+				<a class="btn btn-sm btn-primary view-translated-btn">Click here to view the translated message.</a>
 			</div>
 			<div class="translated-content" style="display:none;">
-			{posts.translatedContent}
+				{posts.translatedContent}
 			</div>
-	        {{{end}}}
+			{{{end}}}
 		</div>
 
 		<div component="post/footer" class="post-footer border-bottom pb-2">

@@ -207,6 +207,8 @@ get:
                                   type: number
                                 isEnglish:
                                   type: boolean
+                                isTranslating:
+                                  type: boolean
                             tags:
                               type: array
                               items:

@@ -35,6 +35,8 @@ PostObject:
       type: boolean
     translatedContent:
       type: string
+    isTranslating:
+      type: boolean
     sourceContent:
       type: string
       nullable: true
@@ -214,6 +216,8 @@ PostDataObject:
           type: boolean
         translatedContent:
           type: string
+        isTranslating:
+          type: boolean
         timestamp:
           type: number
         anonymous:

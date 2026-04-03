@@ -101,7 +101,13 @@ function modifyPost(post, fields) {
 			}
 		}
 		// Mark post as "English" if decided by translator service or if it has no info
-		post.isEnglish = post.isEnglish == 'true' || post.isEnglish === undefined;
+		if (post.isEnglish === 'loading') {
+			// keep as 'loading' — translation in progress
+		} else {
+			post.isEnglish = post.isEnglish == 'true' || post.isEnglish === undefined;
+		}
+		// Ensure isTranslating is a boolean (stored as string in DB)
+		post.isTranslating = post.isTranslating === true || post.isTranslating === 'true';
 		// If translatedContent is undefined, default to empty string (no translation needed for English posts)
 		if (post.translatedContent === undefined) {
 			post.translatedContent = '';

@@ -10,6 +10,7 @@ const groups = require('../groups');
 const activitypub = require('../activitypub');
 const utils = require('../utils');
 const translate = require('../translate');
+const websockets = require('../socket.io');
 
 module.exports = function (Posts) {
 	Posts.create = async function (data) {
@@ -19,9 +20,6 @@ module.exports = function (Posts) {
 		const timestamp = data.timestamp || Date.now();
 		const isMain = data.isMain || false;
 		let hasAttachment = false;
-		const [isEnglish, translatedContent] = await translate.translate(data);
-
-
 		if (!uid && parseInt(uid, 10) !== 0) {
 			throw new Error('[[error:invalid-uid]]');
 		}
@@ -31,7 +29,7 @@ module.exports = function (Posts) {
 		}
 
 		const pid = data.pid || await db.incrObjectField('global', 'nextPid');
-		let postData = { pid, uid, tid, content, sourceContent, timestamp, isEnglish, translatedContent};
+		let postData = { pid, uid, tid, content, sourceContent, timestamp, isEnglish: 'loading', translatedContent: '', isTranslating: true };
 
 		if (data.toPid) {
 			postData.toPid = data.toPid;
@@ -74,6 +72,22 @@ module.exports = function (Posts) {
 
 		({ post: postData } = await plugins.hooks.fire('filter:post.create', { post: postData, data: data }));
 		await db.setObject(`post:${postData.pid}`, postData);
+
+		// Fire-and-forget translation
+		const savedPid = postData.pid;
+		const savedTid = tid;
+		translate.translate(postData).then(([isEng, transContent]) => {
+			Posts.setPostFields(savedPid, { isEnglish: isEng, translatedContent: transContent, isTranslating: false });
+			if (websockets.server) {
+				websockets.in(`topic_${savedTid}`).emit('event:post_translated', {
+					pid: savedPid,
+					isEnglish: isEng,
+					translatedContent: transContent,
+				});
+			}
+		}).catch(() => {
+			Posts.setPostFields(savedPid, { isEnglish: 'true', translatedContent: '', isTranslating: false });
+		});
 
 		const topicData = await topics.getTopicFields(tid, ['cid', 'pinned']);
 		postData.cid = topicData.cid;
