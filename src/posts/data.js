@@ -102,7 +102,7 @@ function modifyPost(post, fields) {
 		}
 		// Mark post as "English" if decided by translator service or if it has no info
 		if (post.isEnglish === 'loading') {
-			// keep as 'loading' — translation in progress
+			post.isEnglish = true; // needs to be a boolean
 		} else {
 			post.isEnglish = post.isEnglish == 'true' || post.isEnglish === undefined;
 		}

@@ -10,6 +10,7 @@ services:
       - nodebb-uploads:/usr/src/app/public/uploads
       - nodebb-config:/opt/config
       - ./install/docker/setup.json:/usr/src/app/setup.json
+    
 
   mongo:
     image: 'mongo:7-jammy'

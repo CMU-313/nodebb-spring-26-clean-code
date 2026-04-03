@@ -2,7 +2,7 @@
 
 const translatorApi = module.exports;
 
-const TRANSLATOR_URL = 'http://17313-team11.s3d.cmu.edu:5000' || 'http://localhost:5000';
+const TRANSLATOR_URL = 'http://17313-team11.s3d.cmu.edu:5000';
 
 translatorApi.translate = async function (postData) {
 	try {
