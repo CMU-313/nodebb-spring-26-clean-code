@@ -43,8 +43,8 @@ ENV NODE_ENV=production \
     SILENT=false \
     USER=nodebb \
     UID=1001 \
-    GID=1001 \
-    START_BUILD=true
+    GID=1001 
+# START_BUILD=true
 
 WORKDIR /usr/src/app/
 

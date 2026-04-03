@@ -72,8 +72,8 @@ module.exports = function (Posts) {
 
 		({ post: postData } = await plugins.hooks.fire('filter:post.create', { post: postData, data: data }));
 		await db.setObject(`post:${postData.pid}`, postData);
-
-		if (process.env.NODE_ENV !== 'test') {
+		const inTest = typeof global.it === 'function';
+		if (!inTest) {
 			// Fire-and-forget translation
 			const savedPid = postData.pid;
 			const savedTid = tid;
