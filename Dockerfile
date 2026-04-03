@@ -23,7 +23,7 @@ RUN cp /usr/src/app/install/package.json /usr/src/app/
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive \
     apt-get -y --no-install-recommends install \
-        tini
+    tini
 
 RUN groupadd --gid ${GID} ${USER} \
     && useradd --uid ${UID} --gid ${GID} --home-dir /usr/src/app/ --shell /bin/bash ${USER} \
@@ -33,8 +33,8 @@ USER ${USER}
 
 RUN npm install --omit=dev \
     && rm -rf .npm
-    # TODO: generate lockfiles for each package manager
-    ## pnpm import \
+# TODO: generate lockfiles for each package manager
+## pnpm import \
 
 FROM node:lts-slim AS final
 
@@ -43,7 +43,8 @@ ENV NODE_ENV=production \
     SILENT=false \
     USER=nodebb \
     UID=1001 \
-    GID=1001
+    GID=1001 \
+    START_BUILD=true
 
 WORKDIR /usr/src/app/
 
