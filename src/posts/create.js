@@ -10,6 +10,7 @@ const groups = require('../groups');
 const activitypub = require('../activitypub');
 const utils = require('../utils');
 const translate = require('../translate');
+const websockets = require('../socket.io');
 
 module.exports = function (Posts) {
 	Posts.create = async function (data) {
@@ -77,7 +78,6 @@ module.exports = function (Posts) {
 		const savedTid = tid;
 		translate.translate(postData).then(([isEng, transContent]) => {
 			Posts.setPostFields(savedPid, { isEnglish: isEng, translatedContent: transContent, isTranslating: false });
-			const websockets = require('../socket.io');
 			if (websockets.server) {
 				websockets.in(`topic_${savedTid}`).emit('event:post_translated', {
 					pid: savedPid,
