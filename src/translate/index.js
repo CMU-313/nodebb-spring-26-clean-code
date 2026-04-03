@@ -15,6 +15,7 @@ translatorApi.translate = async function (postData) {
 		const translatedContent = data.translated_content || '';
 		return [isEnglish, translatedContent];
 	} catch (err) {
+		console.log('Translation error!', err, TRANSLATOR_URL);
 		return ['true', ''];
 	}
 };
